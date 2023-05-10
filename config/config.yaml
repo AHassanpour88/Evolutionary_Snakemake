@@ -1,35 +1,42 @@
 # How many parameters we want to optimize?
-nfactors: 18
+nfactors: 3
 
 # Do we have binary variables?
-binary_parameter: TRUE
-number_binary_parameter: 2
-binary: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+#binary_parameter: TRUE
+#number_binary_parameter: 2
+#binary: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+binary_parameter: FALSE
+number_binary_parameter: 0
+binary: [FALSE, FALSE, FALSE]
+
+
+# name_parameter:
+# - "HT1_2" #binary
+# - "HT2_2" #binary
+# - "DH0_capacity_female"
+# - "DH0_capacity_male"
+# - "P0_female"
+# - "P0_male"
+# - "P1_female"
+# - "P1_male"
+# - "P2_female"
+# - "P2_male"
+# - "ncross_female" #linked to "female_rec_p2", "female_rec_p1","female_rec_p0",
+# - "ncross_male" #linked to "male_rec_p2", "male_rec_p1","male_rec_p0",
+# - "female_rec_p2" 
+# - "female_rec_p1"
+# - "female_rec_p0"
+# - "male_rec_p2"
+# - "male_rec_p1"
+# - "male_rec_p0"
 
 # Name of parameters we want to optimize?
 name_parameter:
-  - "HT1_2" #binary
-  - "HT2_2" #binary
-  - "DH0_capacity_female"
-  - "DH0_capacity_male"
-  - "P0_female"
-  - "P0_male"
-  - "P1_female"
-  - "P1_male"
-  - "P2_female"
-  - "P2_male"
-  - "ncross_female" #linked to "female_rec_p2", "female_rec_p1","female_rec_p0",
-  - "ncross_male" #linked to "male_rec_p2", "male_rec_p1","male_rec_p0",
-  - "female_rec_p2" 
-  - "female_rec_p1"
-  - "female_rec_p0"
-  - "male_rec_p2"
-  - "male_rec_p1"
-  - "male_rec_p0"
-# running 1 simulation with certain parameters multiple times
-nrepetitions:
-  search: 1
-  refinement: 1
+  - "n_test" #binary
+  - "n_bull" #binary
+  - "n_bull_sel"
+
 
 # number of initial simulation that we need to sample from can be specified within the sampleScript 
 sim_init: 250 #big enough that we have a good coverage on search space!
@@ -47,12 +54,13 @@ time: 1*1*60
 memory: 15*1000 
 
 # minimum range of mutation if the variation was low depends on the range of parameter
-min_range_mut: [0.1, 0.1, 500, 500, 50, 50, 5,5,2,2, 15,15,7,7,7,7,7,7]
+#min_range_mut: [0.1, 0.1, 500, 500, 50, 50, 5,5,2,2, 15,15,7,7,7,7,7,7]
+min_range_mut: [50, 50, 5]
 
 
 # if you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters
 # find the linked_parameter if statement in the evoScript and adopt the number of parameters linked 
-linked_parameter: TRUE
+linked_parameter: FALSE
 num_linked_parameter: 3
 param3_link_male: [16,17,18]
 param3_link_female: [13,14,15]
@@ -61,12 +69,14 @@ linked_param_female: [11]
 
 
 # initial cost of the program to be calculated based on each parameter
-base_cost_ini: [1,1,30000, 28000, 1400, 2000, 350, 350, 20,35, 300, 350]
+# base_cost_ini: [1,1,30000, 28000, 1400, 2000, 350, 350, 20,35, 300, 350]
+base_cost_ini: [2368, 175]
 
 # Rounding in light of the constrains
 # only parameters that are included in cost functions will be used
 # In our example binary variables and linked parameters are not directly include in cost so we have to exclude them
-cost_par: [3,4,5,6,7,8,9,10,11,12]
+#cost_par: [3,4,5,6,7,8,9,10,11,12]
+cost_par: [1,2]
 
 cheapest_unit_female: [3]
 cheapest_unit_male: [4]
@@ -77,5 +87,5 @@ cost_cheapest_female: 26.5
 
 
 # For visualization, if you already know what is your target is and you only
-my_target: FALSE
+my_target: TRUE
 target: [2368, 175, 13]
