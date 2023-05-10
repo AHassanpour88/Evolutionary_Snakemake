@@ -9,9 +9,11 @@ configfile: "config/config.yaml"
 # search phase -- 1
 # refinement phase -- 2
 # iterations = config["niterations"]["search"] # should not define within config.yaml, but read from 
-iterations = pd.read_csv("config/iterations.csv").iloc[-1]["iteration_end"]
+evoParams = config["evoParams"]
+iterations = pd.read_csv(evoParams).iloc[-1]["iteration_end"]
+iterations = int(iterations)
 
-repetitions = 2 ## replace to read from file when needed
+repetitions = 1 ## replace to read from file when needed
 
 # constrain wildcards to only match regular expression
 wildcard_constraints:
@@ -19,7 +21,7 @@ wildcard_constraints:
     rep = "[0-9]+",
     sim = "[0-9]+"
 
-localrules: all, sampleVAl, runEvolutionary_1, runEvolutionary_2,  gatherResults
+localrules: all, sampleVAl, runEvolutionary,  gatherResults
 
 # target rule
 rule all:
@@ -36,12 +38,19 @@ rule all:
 # define input functions ----------------------------------- 
 
 def aggregate_input(wildcards):
-    n=int(wildcards.iter)
-    n
+    global evoParams
+    n = int(wildcards.iter)
+    evoParams_pd = pd.read_csv(evoParams)
+    for index, row in evoParams_pd.iterrows():
+        if int(row["iteration_start"]) <= n and int(row["iteration_end"]) >= n:
+            repetitions = int(row["nrep"])
+            break
     if n == 1:
+        return("")
+    elif n == 2:
         file = checkpoints.sampleVAl.get().output[0]
         file = pd.read_csv(file,index_col = 0)
-        files = ["results/iteration_{iter}/results_{sim}_{rep}.RData".format(sim=s,rep=r) for s in file.index for r in range(1,int(repetitions) + 1,1)]
+        files = ["results/iteration_1/results_{sim}_{rep}.RData".format(sim=s,rep=r) for s in file.index for r in range(1,int(repetitions) + 1,1)]
         return(files)
     else:
         file = checkpoints.runEvolutionary.get(iter=n-1).output[0]
@@ -51,12 +60,12 @@ def aggregate_input(wildcards):
 
 def aggregate_input_final(wildcards):
     global iterations
-    stop_file = "finish.txt"
+    stop_file = "finish.txt" 
     if os.path.exists(stop_file):
-        n = int(pd.read_csv(stop_file, header = None)[0])
+        n = int(pd.read_csv(stop_file, header = None)[0][0])
     else:
         n = int(iterations)
-    file = checkpoints.runEvolutionary.get(iter=n).output[0]
+    file = checkpoints.runEvolutionary.get(iter = n).output[0]
     file = pd.read_csv(file,index_col = 0)
     files = ["results/iteration_{iter}/results_{sim}_{rep}.RData".format(iter = n, sim=s, rep=r) for s in file.index for r in range(1,int(repetitions) + 1,1)]
     return(files)
@@ -128,6 +137,8 @@ checkpoint runEvolutionary:
     output:
         nextpars = "results/parameters/params_{iter}.csv"
     log:  "results/parameters/params_{iter}.csv.log"
+    # wildcard_constraints:
+    #     iter = "^[^1]$|^[0-9]{2,}$" 
     threads: 1
     shell:
         """

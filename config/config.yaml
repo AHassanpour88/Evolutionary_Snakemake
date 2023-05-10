@@ -33,9 +33,9 @@ nrepetitions:
 
 # number of initial simulation that we need to sample from can be specified within the sampleScript 
 sim_init: 250 #big enough that we have a good coverage on search space!
-sampleScript: "config/sampleScript_quick.r"
+sampleScript: "scripts/sampleScript.r"
 # adapt your silumation script in simuScript
-simuScript: "config/simuScript_quick.r"
+simuScript: "scripts/simuScript.r"
 # Evolutionary algorithm 
 evoScript: "scripts/evoScript.r"
 evoParams: "config/iterations.csv"

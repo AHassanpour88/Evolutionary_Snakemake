@@ -840,3 +840,9 @@ evolutionary_log$mut_temp = cbind(evolutionary_log$mut_temp, mut_offspring_temp)
 
 save(file = "EvoStatus/EvoStatus.RData", list = c("evolutionary_log"))
 write.csv(new_setting, file = output)
+###########################################################################################
+############### placeholder stopping criteria #############################################
+###########################################################################################
+if(FALSE){
+  cat(paste0(iteration,"\n"),file="finish.txt")
+}
