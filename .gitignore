@@ -1,3 +1,5 @@
 .snakemake
 finish.txt
 results
+EvoStatus
+logs

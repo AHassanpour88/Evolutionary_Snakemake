@@ -26,6 +26,7 @@ n_off_recombination <- evoParameters$n_off_recombination[sel_tmp_row]
 n_off_mutation <- evoParameters$n_off_mutation[sel_tmp_row]
 n_off_random <- evoParameters$n_off_random[sel_tmp_row]
 
+n_rep <- evoParameters$nrep[sel_tmp_row]
 
 nfactors = config$nfactors
 number_binary_parameter = config$number_binary_parameter
@@ -169,8 +170,10 @@ n_off <- n_off1 + n_off_recombination + n_off_mutation + n_off_random
 # if(iteration > 4){
 #   n_rep = nrow(results_new) / n_off
 # } else {
-n_rep = 1
+# n_rep = 1
 # }
+
+
 
 # new results from n_off_random are randomly sampled - exclude those in
 # calculations like the standard deviation of values
