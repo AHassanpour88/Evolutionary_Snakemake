@@ -432,7 +432,6 @@ mean_results <- mean(results_new[1:(n_mix),ncol(results_new)])
 ################################################################################
 re <- NULL
 for(index in (n_off1 + 1):n_off){
-  
   thres <- mean_results - 1*sd_results # just to avoid testing very very bad settings
   
   valid <- FALSE
@@ -564,6 +563,12 @@ for(index in (n_off1 + 1):n_off){
       ##################### Compensate the rest in cheapest unit #####################
       ################################################################################
       if(new_cost!=base_cost){
+        if(config$cheapest_unit_female > length(off)){
+          stop("cheapest_unit_female of the config file has to be <= ",length(off))
+        }
+        if(config$cheapest_unit_male > length(off)){
+          stop("cheapest_unit_male of the config file has to be <= ",length(off))
+        }
         cheapest_unit_female <- config$cheapest_unit_female
         cheapest_unit_male <- config$cheapest_unit_male
         cost_cheapest_female <- config$cost_cheapest_female

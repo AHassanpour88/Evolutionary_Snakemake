@@ -78,8 +78,8 @@ base_cost_ini: [2368, 175]
 #cost_par: [3,4,5,6,7,8,9,10,11,12]
 cost_par: [1,2]
 
-cheapest_unit_female: [3]
-cheapest_unit_male: [4]
+cheapest_unit_female: [1]
+cheapest_unit_male: [2]
 
 # Calculate the cheapest cost of a parameter using the cost function in Function folder
 cost_cheapest_male: 34.45

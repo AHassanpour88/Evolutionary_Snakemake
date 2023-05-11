@@ -46,7 +46,7 @@ generate_new <- function(){
 
 x <- numeric(3)
 x[1] <- sample(300:500,1)
-x[2] <- floor((10000000-3000*)/4000)
+x[2] <- floor((10000000-3000)/4000)
 x[3] <- sample(10:20, 1)
 
 x <- c(x[2],x[1],x[3])
