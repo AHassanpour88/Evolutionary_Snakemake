@@ -1,0 +1,18 @@
+name:
+  mobpsopti
+channels:
+  - conda-forge
+- bioconda
+- defaults
+dependencies:
+  - python
+- pandas
+- bioconda:snakemake>=7.14
+- r-base>=4.1
+- r-yaml
+- r-tidyverse
+- r-data.table
+- r-remotes
+- r-stringr
+- r-patchwork
+- r-purrr
