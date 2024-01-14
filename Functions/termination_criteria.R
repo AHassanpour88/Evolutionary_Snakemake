@@ -1,3 +1,6 @@
+## this function can be changed to any termination criteria the user wants to implement
+# the general termination criteria is when the number of final iteration is reached by the algorthm 
+
 termination_criteria <- function(evolutionary_log, 
                                 iteration, 
                                 thresh_target_ave = 0.015, 
