@@ -1,26 +1,51 @@
+<img src="https://github.com/AHassanpour88/test_for_private/raw/main/images/logo.PNG" align="right" alt="Logo" width="300" height="200">
+
 # Optimization of breeding program designs through evolutionary algorithm (MoBPSopti Project)
 
-Modern breeding programs have increased significantly in size and complexity, with various highly interdependent parameters and many contrasting breeding goals. As a result, resource allocation in these programs has become more complex, and deriving an optimal breeding strategy has become increasingly challenging. Optimization in breeding programs is crucial, as it helps us make the most efficient use of limited resources such as time, money, and breeding materials, which increases the likelihood of achieving our objectives and ensure adaptability to changing circumstances.
+Modern breeding programs have increased significantly in size and complexity, with various highly interdependent parameters and many contrasting breeding goals. As a result, resource allocation in these programs has become more complex, and deriving an optimal breeding strategy has become increasingly challenging. Optimization in breeding programs is crucial, as it helps us make the most efficient use of limited resources such as time, money, and breeding materials, which increases the likelihood of achieving our objectives and ensure adaptability to changing circumstances. The resource allocation problem is a key challenge in optimization theory with various practical uses and many algorithms have been proposed, all sharing a common structure with two parts: simulation and optimization. First, they use simulation to assess performance under different parameter settings. Then, they use optimization to find the best way to allocate these parameters, achieving different objectives while reducing costs or increasing benefits. In this repository, we use an evolutionary optimization framework to optimize resource allocation in a breeding program with the use of stochastic simulation combining with Snakemake workkflow management system, providing you to fine-tune and enhance your breeding program while efficiently allocating your breeding resources to attain various objectives.
 
-This repository serves as an optimization framework, providing you to fine-tune and enhance your breeding program while efficiently allocating your breeding resources to attain various objectives. To align your specific breeding program with our optimization pipeline, we've incorporated specific components intentionally designed as non-modifiable by users. It is important to exercise caution when modifying these folders to ensure optimal performance and maintain the integrity of the pipeline. Therefore, it is advised to follow the best practices when modifying different parts of the framework as outlined below.
+This repository contains all the components you need to for optimization including libraries, system tools, and code, where we store, manage, and deploy our optimization pipeline:
+```
+|-- Snakefile
+|-- config
+    |-- config.yaml
+    |-- iterations.csv
+|-- scripts
+    |-- sampleScript.r
+    |-- simuScript.r
+    |-- evoScript.r
+    |-- visualizeParameters.r
+|-- Functions
+    |-- cost_function.R
+    |-- generate_new.R
+    |-- termination_criteria.R
+|-- environment
+    |-- installMoBPSOpti.sh
+    |-- environment.yaml
+    |-- MoBPS_1.10.40.tar.gz
+    |-- RandomFieldsUtils_1.0.6.tar.gz
+    |-- miraculix_1.0.5.tar.gz
+```
+In the sections that follow, we provide detailed explanations for each component, ensuring that you have a clear understanding of their functionalities and how they contribute to our optimization process. If needed, we'll also provide broader insights and introductions to different sections to make your experience with this repository as informative and effective as possible.
 
 ## Who can use our framework?
-Our framework is not just for one type of breeding program; it works for both animals and plants. While there are subtle differences in the theoretical concepts, objectives, tools, and methods between animal and plant breeding, the overall process of designing and optimizing these programs remains intricate. To use our framework, you need to have a clear plan for your breeding program that can be created using stochastic simulation. A well-designed simulation script serves as the backbone of your optimization, allowing you to systematically explore various aspects of breeding programs and draw meaningful conclusions. When you create your simulation plan, remember two important things:
+Our framework is not just for one type of breeding program; it works for both animals and plants. While there are subtle differences in the theoretical concepts, objectives, tools, and methods between animal and plant breeding, the overall process of designing and optimizing these programs remains intricate. To use our framework, you need to have a clear plan for your breeding program that can be created using stochastic simulation. A well-designed simulation script serves as the backbone of your optimization, allowing you to systematically explore various aspects of breeding programs and draw meaningful conclusions. When you create your simulation plan, remember one important thing: **Flexibility**. 
+When designing a simulation script for a breeding program, it's crucial to build flexibility into the plan to handle diverse scenarios. This flexibility allows you to explore various aspects of breeding programs and adapt to different situations within a specified range. Being able to switch between different strategies allows for the investigation of their impact on genetic progress and breeding program efficiency. Below are key components to consider when specifying the details of your breeding program in the simulation script:
 
-**1. Flexibility:** Your plan should be able to handle different settings. Imagine it as being able to adjust to different situations within a certain range. This flexibility lets you try out different ideas and improve your breeding program effectively. Start by specifying the details of your breeding program:
+  *  Selection and mating: Implement different selection criteria and methods. This could involve choosing between different indices, adjusting selection intensities, or exploring marker-assisted selection/ genomic selection. Design the script to accommodate varying mating designs (random mating, controlled mating, family-based mating), population sizes, and the presence of different subpopulations. 
 
-  *  Which species you're working with and what is the breeding design.
-  *  What traits you want to improve.
-  *  How you plan to breed them, like choosing the best ones or using special genetic techniques.
+  *  Genetic and environmental factors: Allow for the adjustment of heritability values, genetic correlations, and other genetic parameters. Consider incorporating environmental variables that influence trait expression.
 
-**2. Parameterization:** Your breeding design should be easy to adjust. You should be able to change important things like how many animals or plants you have in each stage, how many generations you want to go through, how strict you are in picking the best ones or mixing their genetics, and many other relevant factors that can be considerd for optimization. 
+  *  Breeding Objectives: Define breeding objectives that reflect different breeding goals. For example, the script should allow the user to prioritize traits differently or adjust the economic weights assigned to each trait.
+
+  *  Scenario-specific Settings: Integrate scenario-specific settings into the script. For instance, the script could handle scenarios like population bottlenecks, introduction of new genetic material, or changes in selection pressure. Design the script to record relevant data at each generation and allow for easy adaptation of analysis methods. 
 
 ## How to design your breeding program?
-To get started, the foundation of our breeding program relies on the use of stochastic simulation. That's where Modular Breeding Program Simulator (MOBPS) comes in. It's a new way to plan and design breeding programs, and it's changing the game designed to streamline various aspects of breeding programs. MoBPS is a smart simulation tool that helps to closely mimic real-world breeding scenarios. The software takes care of backend-“stuff“ that you have to account for, but is not main part of analysis (like meiosis, trait simulation, and ensuring that your data is efficiently stored and ready for analysis). Moreover, it comes pre-equipped with functions for common breeding actions such as breeding value estimation, phenotyping, and selection, making your breeding program more efficient. With MOBPS, we can look at different traits in plants and animals, deal with changes in the environment, and balance different goals more precisely. Note that, design and simulation of a breeding program are not transferable between breeding programs due to their program-specific nature, but successful breeding actions and methodologies employed in one program can serve as valuable references for implementation in different programs.
+To get started, the foundation of our framework relies on the use of stochastic simulation. That's where Modular Breeding Program Simulator (MoBPS) comes in to streamline various aspects of breeding programs. MoBPS is a simulation tool that helps to closely mimic real-world breeding programs. The software takes care of backend-“stuff“ that you have to account for, but is not main part of analysis (like meiosis, trait simulation, and ensuring that your data is efficiently stored and ready for analysis). Moreover, it comes pre-equipped with functions for common breeding actions such as breeding value estimation, phenotyping, and selection, making your breeding program more efficient. With MoBPS, we can look at different traits in plants and animals, deal with changes in the environment, and balance different goals more precisely. Note that, design and simulation of a breeding program are not transferable between breeding programs due to their program-specific nature, but successful breeding actions and methodologies employed in one program can serve as valuable references for implementation in different programs.
 
 ### Introduction to the R package MoBPS
 
-Starting with MoBPS might seem a little tricky at first because there are so many options to choose from. To start, we provide a short tutorial (created by Johannes Geibel) which lead you through the basic functionality of the R package MoBPS; <https://www.g3journal.org/content/10/6/1915>) which can be found at [GitHub](https://github.com/tpook92/MoBPS "https://github.com/tpook92/MoBPS"). Further help may give the [MoBPS YouTube channel](https://www.youtube.com/channel/UC4LDcBka39NidOF1y_65FFw "https://www.youtube.com/channel/UC4LDcBka39NidOF1y_65FFw"). To explore additional examples and gain a deeper understanding of practical applications, interested readers are encouraged to review materials from previous workshops on MoBPS available at the following GitHub repository: [GitHub](https://github.com/AHassanpour88/MoBPS/blob/master/MoBPS_Workshop_GFT%2526KWS). 
+Getting started with MoBPS as a stochastic simulator might feel a bit overwhelming initially because there are many options to choose from. Unlike deterministic simulations, here you have to simulate every individual breeding action individually, which means more programming work and a deeper understanding of the breeding system. To start, we provide a short tutorial (created by Johannes Geibel) which lead you through the basic functionality of the R package MoBPS; <https://www.g3journal.org/content/10/6/1915>) which can be found at [GitHub](https://github.com/tpook92/MoBPS "https://github.com/tpook92/MoBPS"). Further help may give the [MoBPS YouTube channel](https://www.youtube.com/channel/UC4LDcBka39NidOF1y_65FFw "https://www.youtube.com/channel/UC4LDcBka39NidOF1y_65FFw"). To explore additional examples and gain a deeper understanding of practical applications, interested readers are encouraged to review materials from previous workshops on MoBPS available at the following GitHub repository: [GitHub](https://github.com/AHassanpour88/MoBPS/blob/master/MoBPS_Workshop_GFT%2526KWS). 
 
 <details><summary><b>Show instructions</b></summary>
 
@@ -184,7 +209,7 @@ popList <- creating.trait(population = popList,
                           # indices of correlated traits
                           shuffle.traits = c(1,2),
                           # genetic correlation (0.25) matrix
-                          shuffle.cor = matrix(c(1,.25,
+                          trait.cor = matrix(c(1,.25,
                                                  .25,1),2,2),
                           # residual correlation (0) matrix
                           new.residual.correlation = matrix(c(1,0,
@@ -326,7 +351,7 @@ If we do not only want to apply random selection, but selecting the best males b
 
 $$\sigma^2_E=\frac{\sigma^2_A}{h^2} - \sigma^2_A = \frac{\sigma^2_A (1-h^2)}{h^2}$$
 
-If we assume heritabilities of 0.8 respectively 0.3 for both of our traits, $\sigma^2_{E;MKG}=156.25$ and $\sigma^2_{E;FP}=0.58$. As only female cows can give milk, we simulate the phenotypes for all not yet phenotyped females by the following code. Note that you have to set `sigma.e` only once, if you do not assume changes over the generations! `sigma.e` can also be automatically fitted by the use of the `heritability` parameter.
+If we assume heritabilities of 0.8 and 0.3 respectively for our traits, $\sigma^2_{E;MKG}=156.25$ and $\sigma^2_{E;FP}=0.58$. As only cows can give milk, we simulate the phenotypes for all not yet phenotyped females by the following code. Note that you have to set `sigma.e` only once, if you do not assume changes over the generations! `sigma.e` can also be automatically fitted by the use of the `heritability` parameter.
 
 ```{r eval=FALSE, include=FALSE}
 (25^2*(1-0.8))/0.8
@@ -471,7 +496,7 @@ As $2C_{xy}=R_{xy}$ and $2C_{xx}-1=F_X$ , we can use the results to calculate av
 </details>
 
 ## Our framework as Snakemake Workflow Management System
-Snakemake is being used as a workflow management system for creating and executing data analysis pipelines to automate a set of scripts that need to be run in a specific order regularly. It helps to ensure that all of the steps in the process are executed correctly and efficiently every time from start to finish. Snakemake is a powerful tool that allows us to define a workflow in terms of rules, where each rule defines the input and output files and the commands to execute and transform the input files into the output files. One of the key features of Snakemake is that it handles dependencies between the rules automatically. It tracks the status of input and output files and only executes a rule when its input files are newer than its output files. This ensures that the workflow is executed correctly and efficiently, as Snakemake only re-runs necessary rules. This can save a lot of time and resources when dealing with large and complex workflows. Moreover, Snakemake allows us to customize the workflow to integrate it well with other systems and tools. For example, we could specify custom shell commands to run, use different types of cluster resources, or invoke other software programs. Snakemake can execute tasks in parallel on multi-core machines or distribute tasks across a cluster or cloud resources. Snakemake also provides detailed logging and reporting functionality, so we could easily track the progress of our workflow and troubleshoot any issues that may arise. We have developed a Snakemake script available in the [Snakemake](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/Snakefile) specifically for optimizing breeding programs. Snakemake reads various input files from our framework, which we will explain in more detail to help you configure it correctly. Before diving into our Snakemake rules and the vital components of our pipeline, you'll find a brief guide below (created by Johannes Geibel) on how to install Miniconda and set up our optimization framework.
+Snakemake is being used as a workflow management system for creating and executing data analysis pipelines to automate a set of scripts that need to be run in a specific order regularly. It helps to ensure that all of the steps in the process are executed correctly and efficiently every time from start to finish. Snakemake is a powerful tool that allows us to define a workflow in terms of rules, where each rule defines the input and output files and the commands to execute and transform the input files into the output files. One of the key features of Snakemake is that it handles dependencies between the rules automatically. It tracks the status of input and output files and only executes a rule when its input files are newer than its output files. This ensures that the workflow is executed correctly and efficiently, as Snakemake only re-runs necessary rules. This can save a lot of time and resources when dealing with large and complex workflows. Moreover, Snakemake allows us to customize the workflow to integrate it well with other systems and tools. For example, we could specify custom shell commands to run, use different types of cluster resources, or invoke other software programs. Snakemake can execute tasks in parallel on multi-core machines or distribute tasks across a cluster or cloud resources. Snakemake also provides detailed logging and reporting functionality, so we could easily track the progress of our workflow and troubleshoot any issues that may arise. We have developed a Snakemake script available in the [Snakemake](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/Snakefile) specifically for optimizing breeding programs. Snakemake reads various input files from our framework, which we will explain in more detail to help you configure it correctly. Before diving into our Snakemake rules and the vital components of our pipeline, you'll find a brief guide below on how to install Miniconda and set up our optimization framework.
 
 >  **WARNING!** It is important to note that the Snakemake script should not be altered or modified by the user.
 
@@ -508,7 +533,7 @@ As long as a conda environment is activated, programs will be used from this env
 Further download the Anaconda cheat sheet to learn about conda usage:
 https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf
 
-**1.1. Installing conda packages**
+**2. Installing conda packages**
 
 Conda generally eases the process of installing packages, but it may become slow when setting up larger environments. Therefore first install [mamba](https://github.com/mamba-org/mamba) (C++ re-implementation of the conda installation tools and really faster - couldn’t believe by myself first) via conda:
 
@@ -557,75 +582,114 @@ The new environment can be activated by:
 ```{sh}
 conda activate mobpsopti
 ```
-**1.2. mobpsopti environment for optimization**
+**3. mobpsopti environment for optimization**
 
-Now that you are familiar how to create special environment, to make our optimization work easier for you, we've created a bash script that helps you install `Miniconda` and a special environment called `mobpsopti`. You can find all necessary file for this part in [environment folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/environment). This `mobpsopti` environment is like a toolbox with different tools we need for optimization. It includes things like Python, Pandas, and Snakemake for managing tasks, as well as R and some R packages for data analysis. All of these tools are important for our optimization work and help us get things done more efficiently. Before you start your optimization please make sure that you installed everything correctly. Further, if you plan to distribute the snakemake jobs across a larger [cluster](https://snakemake.readthedocs.io/en/stable/executing/cluster.html), you need to setup a profile for your specific cluster scheduler (e.g. slurm). You can find some default profiles in this [project](https://github.com/snakemake-profiles/doc). 
+Now that you are familiar how to create special environment, to make our optimization work easier for you, we've created a bash script that helps you install `Miniconda` and a special environment called `mobpsopti`. You can find all necessary file for this part in [environment folder](https://github.com/AHassanpour88/BASF_Hybrid_Wheat/tree/main/environment). This `mobpsopti` environment is like a toolbox with different tools we need for optimization. It includes things like Python, Pandas, and Snakemake for managing tasks, as well as R and some R packages for data analysis. All of these tools are important for our optimization work and help us get things done more efficiently. Before you start your optimization please make sure that you installed everything correctly. Further, if you plan to distribute the snakemake jobs across a larger [cluster](https://snakemake.readthedocs.io/en/stable/executing/cluster.html), you need to setup a profile for your specific cluster scheduler (e.g. slurm). You can find some default profiles in this [project](https://github.com/snakemake-profiles/doc). 
 
 </details>
 
 ### Snakemake rules
+<img src="https://github.com/AHassanpour88/test_for_private/raw/main/images/Snakemake.png" align="right" alt="Snakemake" width="300">
 
-Our Snakemake process is built around four rules, which are translated into four distinct R scripts. For each of these rules, there is a corresponding R script in [scripts folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/scripts). Snakemake starts with the first rule and it checks if all the inputs required for that rule are available. If the inputs are ready, it runs the corresponding R script for that rule. After completion, it moves on to the next rule in the sequence. This process repeats until all four rules have been executed. Let's break down each rule and see how Snakemake uses them one by one.
+Our Snakemake process is built around four rules, which are translated into four distinct R scripts. For each of these rules, there is a corresponding R script in [scripts folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/scripts). Each rule describes a step in an analysis defining how to obtain output files from input files. Dependencies between rules are determined automatically. Snakemake starts with the first rule and it checks if all the inputs required for that rule are available. If the inputs are ready, it runs the corresponding R script for that rule. After completion, it moves on to the next rule in the sequence. This process repeats until all four rules have been executed. All 4 scripts share a common feature. They uniformly utilize two essential lines of code:
 
-**1. sampleScript (rule 1):**
+```{r}
+args <- commandArgs(TRUE)
+```
+This line uses the commandArgs() function to capture the command-line arguments passed to the R script. The TRUE argument indicates that we want to include all arguments, including the script name. The result is stored in the variable args, which is now a vector containing the script name, parameter settings and their values for simulation/optimization, random seed, number of replication and any additional arguments we need in each step.
 
-In this script, we provide an initialization step that allows users to define parameter bounds and constraints, such as a budget. The purpose of this script is to generate parameter settings for a simulation script. User should modify this script based on the number of parameters that user wants to optimized. In our pipeline we allow two specific types of parameter settings for optimization, which can be varied based on different variables or actions. The first type is continuous variables to determine the optimal values for specific parameters at each step of the breeding program. These parameters may include the number of candidates selected, genotyped, mated, or any other variables that could potentially impact the program's success. By varying these parameters and through the analysis of their effects on the objective of the breeding program, decision-makers have insights on how to optimize the program's outcomes. The second type of action involves carrying out a series of operations or making specific decisions throughout the breeding program. It is crucial to identify when and where key decisions should be made to minimize the impact of unavoidable extensions in terms of time and cost. Such decisions involve yes or no judgments as binary variables that need to be made at different stages of the program. 
+```{r}
+output <- args[1]
+```
+This line selects the first element of the args vector (all used variables) and assigns it to the variable output that can be used as input for the next step.
 
-* Continuous variables: a single value is sampled from the defined range
-* Binary variable: a binomial distribution (0 or 1) with a probability of 0.5
+Let's break down each rule and see how Snakemake uses them one by one for optmization. After formulating your breeding program and the parameters you want to optimize into an optimization problem, our framework starts. Here you see a visualization of the Snakemake workflow for our evolutionary optimization model. Shown are the rule names defined and their input-output relationships. 
+
+
+**Rule 1: sampleVAl (sampleScript):**
+```{sh}
+checkpoint sampleVAl:
+    """
+    input:
+        sampleScript = config["sampleScript"]
+    output:
+        "results/parameters/params_1.csv" 
+    """
+```
+In this rule, the initial script [sampleScript.r](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/scripts/sampleScript.r) will be executed. If the rule successfully completes, it will result in the creation of a **results** folder. Inside this folder, a **parameters** directory will be generated, and the initialization parameters will be stored in a file named `params_1.csv`. Initialization step allows users to define parameter bounds and constraints, such as a budget. The purpose of this script is to generate parameter settings for a simulation script. User should modify this script based on the number of parameters that he/she wants to optimize. In our pipeline we allow two specific types of parameter settings for optimization, which can be varied based on different variables or actions. 
+
+* Continuous variables: represented by generating random samples from a uniform distribution within the specified range of the continuous variable. Continuous parameters may include the number of candidates selected, genotyped, mated, or any other continuous variables that could impact the program's success. By varying these parameters and analyzing their effects on the objective of the breeding program, decision-makers have insights on how to optimize the program's outcomes.
+* Class variable: represented by generating random samples with n potential values from a categorical distribution (also called a generalized Bernoulli distribution), where each setting has an equal probability. The class type of action involves making specific decisions throughout the breeding program.  It is crucial to identify when and where key decisions should be made to minimize the impact of unavoidable extensions in terms of time and cost during the implementation of various strategies at different stages.
 
 >  **NOTE!** The script should be customized by the user to accommodate the desired breeding program for optimization.
 
-**2. simuScript (rule 2):**
+**Rule 2: runSimulations:**
+```{sh}
+rule runSimulations:
+    input:
+        parameters = "results/parameters/params_{iter}.csv",
+        script = ancient(config["simuScript"])
+    output:
+        "results/iteration_{iter}/results_{sim}_{rep}.RData"
+```
+The **runSimulations** rule requires input data in two main forms. First, it necessitates input parameters retrieved from a file located at `results/parameters/params_{iter}.csv,` where the placeholder {iter} corresponds to the specific iteration being processed.  The input data for this step is automatically generated in the preceding step. The second component of the rule involves [simuScript.r](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/scripts/simuScript.r) execution. The simulation model is used to find the values of the decision variables (i.e. model inputs) that optimize (maximize or minimize) the breeding objectives (i.e. corresponding values of model outputs) and ensure
+that any constraints are satisfied. As the simulations are executed, the rule generates an output file that places in the **results** directory as `results/iteration_{iter}/results_{sim}_{rep}.RData`. In this path, {iter} represents the iteration number, while {sim} and {rep} act as placeholders for values that are specific to the simulation and the number of replication that a simulaion shuld be performed being performed. The simulation script serves as the backbone of our pipeline, and it requires careful design tailored to your unique needs and specific breeding programs. It's essential to create this script to be both flexible and adaptable, capable of accommodating various parameter settings that you'll use for optimization. The script should be versatile enough to easily handle these parameter adjustments, which allows you to fine-tune and optimize different aspects of your simulations and efficiently explore a wide range of scenarios.
 
-The simulation script serves as the backbone of our pipeline, and it requires careful design tailored to your unique needs and specific breeding programs. It's essential to create this script to be both flexible and adaptable, capable of accommodating various parameter settings that you'll use for optimization. The script should be versatile enough to easily handle these parameter adjustments, which allows you to fine-tune and optimize different aspects of your simulations and efficiently explore a wide range of scenarios.
+**Burn-in Phase purpose (input file for simuScript outside of framework):**
 
-**2.1. Burn-in Phase purpose (input file for simuScript outside of framework):**
-
-The burn-in phase is like a special setup before you start if you are going to optimize a complex breeding program that takes a lot of time and resources to simulate. In that case, it's a good idea to create this burn-in phase separately. This phase does a few important things: 
-
- * Data is collected and populations will be established to reach back several years into the simulation's history
- * Simulating genome sequence/ founder genotypes/ traits architecture and their correlations 
-
-You only need to do this burn-in phase once and this file becomes the starting point for your simulation, making sure all your optimization efforts start from the same place for consistency. In the end, you make a special group of information as a `R object`, which becomes the input for another important part of our system called `simuScript`, which is rule 2 in our Snakemake workflow. 
+To make a complex breeding program work faster, we suggest setting up a special phase called the burn-in separately. During this phase to speed up the process and save time, we simulate initial breeding cycles in the burn-in phase to create a basic population structure. We do these calculations in advance and store them as these computations will be the same accross all simulations and instead of redoing the simulation each time, we load in this precomputed population list after the burn-in phase. You only need to do this burn-in phase once and this file becomes the starting point for your simulation, making sure all your optimization efforts start from the same place for consistency.
 
 > **NOTE!** If your breeding program is not computationaly too expensive to simulate, you can merge the burn-in phase with the simuScript step.
 
-**2.2. simuScript (input file for evoScript):**
+**simuScript (input file for evoScript):**
 
-Once the parameter settings are generated using the sample script, they are passed to the simulation script. In the simulation script, users can design their breeding program and define the **objective function** to be optimized. 
+Once the parameter settings are generated using the sample script, they are passed to the simulation script. In the simulation script, users can design their breeding program and define the **objective function** to be optimized. simuScript is nearly identical to the BASF_burnin_phase.R script, differing only in the starting/ending generation and the inclusion of a target function. 
 
-> **NOTE!** If you've already completed a burn-in phase, please ensure that your simulation script correctly reads and utilizes the initial information from that phase that you have a sequential continuation from the burnin phase.
+> **NOTE!** If you've already completed a burn-in phase, please ensure that your simulation script correctly reads and imports the outputs from the burn_in phase script at the begining of your simuScript.
 
-The simulation script generates a population of candidate solutions based on the provided parameters. To evaluate the pipeline, we have included an examplary simulation script specifically designed for the hybrid wheat breeding program. This script executes quickly, taking only 1 second to complete. It generates an objective function by considering various parameter combinations. 
+The simulation script generates a population of candidate solutions based on the provided parameters. Our toy example breeding program does not require a burn-in phase. 
 
 >  **NOTE!** The script should be customized by the user to accommodate the desired breeding program for optimization.
 
-**2.3. evoScript (input file for simuScript till convergence) (rule 3):**
-
-The evolutionary script utilizes the parameter settings and objective function from the simulation script as inputs. By evaluating the objective function for each candidate solution and applying various operators iteratively, the algorithm generates new parameter settings for the next iteration as inputs for the simulation script  by selecting and modifying the best parameters settings. This process continues until the algorithm converges towards an optimized solution for the breeding program. The evolutionary script also provides access to the data file generated in each iteration, enabling users to monitor and evaluate the algorithm's progress. The evolutionary script generates a folder called **EvoStatus** starting from iteration 2. Within this folder, an **EvoStatus.RData** file is updated in each iteration. This file contains the current status of the evolutionary algorithm, including relevant data and variables for monitoring and analysis purposes. By saving the progress in separate files for each iteration, users can track the evolution of the algorithm and access historical data for further analysis and evaluation.This data facilitates informed decisions on parameter settings and termination criteria, allowing adjustments during the algorithm's development and implementation. 
+**Rule 3: runEvolutionary (evoScript: input file for simuScript till termination criteria is achieved):**
+```{sh}
+checkpoint runEvolutionary:
+    input:
+        files = "results/iteration_{iter}/results_{sim}_{rep}.RData",
+        script = ancient(config["evoScript"])
+    output:
+        nextpars = "results/parameters/params_{iter}.csv"
+```
+The [evoScript.r](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/scripts/evoScript.r) relies on the results derived from the simulation script as its inputs, along with their respective parameter configurations. Upon successful execution, the rule generates a fresh set of parameter settings stored at `results/parameters/params_{iter}.csv`, where the variable {iter} signifies the current iteration number. This step involves evaluating the objective function for each candidate solution and applying various operators iteratively, and the algorithm generates new parameter settings for the next iteration as inputs for the simulation script  by selecting and modifying the best parameters settings. This process continues until the algorithm converges towards an optimized solution for the breeding program. The evolutionary script also provides access to the data file generated in each iteration, enabling users to monitor and evaluate the algorithm's progress. The evolutionary script generates a folder called **EvoStatus** starting from iteration 2. Within this folder, an **EvoStatus.RData** file is updated in each iteration. This file contains the current status of the evolutionary algorithm, including relevant data and variables for monitoring and analysis purposes. By saving the progress in separate files for each iteration, users can track the evolution of the algorithm and access historical data for further analysis and evaluation. This data facilitates informed decisions on parameter settings and termination criteria, allowing adjustments during the algorithm's development and implementation. 
 
 >  **WARNING!** Modifying this script is not advisable and should be avoided by the user.
 
-**2.4. visualizeParameters (rule 4):**
-
-The visualization script is the final component of the pipeline, responsible for demonstrating the convergence of parameters over iterations. This script takes the final output generated from all iterations and produces visualizations that aid in understanding the level of convergence achieved by the parameters. When the termination criteria is achieved, this script create one plot for each parameter and show how they converge to an optimal value.
+**Rule 4: gatherResults (visualizeParameters):**
+```{sh}
+rule gatherResults:
+    input:
+        files = aggregate_input_final,
+        script = config["visualizeParameters"]
+    output:
+        "rplot.pdf" 
+```
+The [visualizeParameters.r](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/scripts/visualizeParameters.r) is the final component of the pipeline, responsible for demonstrating the convergence of parameters over iterations. This script takes the final output generated from all iterations and produces visualizations that aid in understanding the level of convergence achieved by the parameters. When the termination criteria is achieved, this script create one plot for each parameter and validate if they converge to an optimal value. The plot will be saved as `rplot.pdf` in the main folder at the end. 
 
 >  **WARNING!** Modifying this script is not advisable and should be avoided by the user.
 
 ### Costumized parameter settings for different rules in Snakemake
 
-**1. Config [folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/config)**
+**Config [folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/config)**
 
-**1.1. config.yaml**
+**config.yaml**
    
-Start designing and optimizing your new breeding program by utilizing the `config.yaml` file. This crucial file enables you to configure the breeding pipeline according to the specific requirements of your program. Specify the number of parameters, differentiate between binary and continuous variables, and provide appropriate variable names to optimize your breeding program effectively. In the optimization process, each parameter is assigned a specific index based on their position in the `name_parameter` variable. Please note that the indexing starts from 1 and continues sequentially. Users must accurately refer to the correct indices.
+Start designing and optimizing your new breeding program by utilizing the `config.yaml` file. This crucial file enables you to configure the breeding pipeline according to the specific requirements of your program. Specify the number of parameters, differentiate between class and continuous variables, and provide appropriate variable names to optimize your breeding program effectively. In the optimization process, each parameter is assigned a specific index based on their position in the `name_parameter` variable. Please note that the indexing starts from 1 and continues sequentially. Users must accurately refer to the correct indices.
 
 Plugins:
 
 * `@nfactors` Number of parameter that you want to optimize in your simulation process.
 * `@name_parameter` Names of the parameters you want to optimize are listed here. These names should be exactly as the names of the parameter you want to optimize in the simulation process. Each parameter is assigned a specific index based on their position in this variable.
-* `@binary_parameter` Existence of binary variables by TRUE/FALSE
+* `@binary_parameter` Existence of class variables by TRUE/FALSE
 * `@Sim_init` Number of initial simulations to perform in first iteration to have a good coverage of the search space
 * `@sampleScript` Path to sample scripts for rule 1 used in the optimization process for snakemake
 * `@simuScript` Path to simulation scripts for rule 2 used in the optimization process for snakemake
@@ -637,36 +701,38 @@ Plugins:
 * `@memory` Define the memory constraint for single simulation
 > To calculate the approximate time and memory for a single simulation, perform only one simulation (with upper bound of the desired parameter settings) and use resource tracking with **sacct** for this step to provide insights into job execution and resource consumption.
 * `@min_range_mu` The mutation operator need a minimum value range for each parameter. This range is essential in cases where the standard deviation of a parameter being mutated is small or when the parameter has a limited set of possible values
-* `@distance_factor` Distance factor to control the diversity of solution
-* `@redo_probability` Probability of recombination in binary settings. Repeating the selection process until two parents with identical binary parameters are found. Initially, a probability of 0.2 is used, which is increased by 0.1 for each subsequent iteration
-* `@mut_offspring` Mutation probability in recombined offspring
-* `@mut_parent` Mutation probability in a single parent
-* `@linked_parameter` Designed when optimizing closely linked parameters by TRUE/FALSE. When one parameter is linked to other parameters, a mutation in that parameter can affect the others. This option ensures that any mutation in a linked parameter causes changes in all other linked parameters. This approach reduces the number of mutations that occur in highly linked parameters, which can otherwise lead to an unstable or inefficient optimization process.
-* `@linked_parameter_female` How many linked parameter we have on female side
-* `@linked_parameter_male` How many linked parameter we have on male side
-* `@num_linked_parameter` Number of linked parameter in breeding program for female/male side 
-* `@param3_link_male` Index of linked parameters in male side
-* `@param3_link_female` Index of linked parameters in female side
-* `@linked_param_male` Index of parameter that linked parameter are connect to it in male side
-* `@linked_param_female` Index of parameter that linked parameter are connect to it in female side
-> **NOTE!** The linked_parameter option can be challenging to apply universally across different breeding programs, especially if your specific program doesn't have closely interconnected parameters, as demonstrated in the breeding example. 
+* `@mut_offspring` Mutation probability in recombined offspring.
+* `@mut_parent` Mutation probability in a single parent. 
+* `@linked_parameter` Designed when optimizing closely linked parameters by TRUE/FALSE. When one parameter is linked to other parameters, a mutation in that parameter can affect the others. This option ensures that any mutation in a linked parameter causes changes in all other linked parameters. This approach reduces the number of mutations that occur in highly linked parameters, which can otherwise lead to an unstable or inefficient optimization process. 
+
+> **NOTE!** `linked_parameter_female` and `linked_parameter_male` are two plugins and a way to organize groups of parameters, where the first value in the list is considered the main parameter. This main parameter is linked with other parameters listed afterward. For instance, if you have `linked_parameter_female: [1,2,3]`, it means that parameters 2 and 3 are linked to parameter 1. So, any changes or adjustments made to parameter 1 will also affect parameters 2 and 3. It's a way of indicating relationships between parameters and understanding that they work together as a group.
+
+> **NOTE!** The linked_parameter option can be challenging to apply universally across different breeding programs, especially if your specific program doesn't have closely interconnected parameters, as demonstrated in the breeding example. In such cases, it's advisable to set linked_parameter_adjustment to TRUE in config file and customize the evolutionary script in `linked_parameter_adjustment` part to align with your program's specific requirements.
+
 * `@base_cost_ini` Initial number of each parameter in a base scenario that the cost needs to be calculated for that
 * `@cost_par` Only index of parameters that are included in cost functions
-> **NOTE!** Binary variables are not directly included in the cost and they usually depend on the existance of the other cohorts
 
-> **NOTE!** Linked parameters can be relevant or non relavant for cost scaling. In some breeding scheme the linked parameters are the ones with no financial impact but that is nothing general and another breeding scenario might have linked parameters that are in the cost
+> **NOTE!** Class variables are not directly included in the cost and they usually depend on the existance of the other cohorts 
+
+> **NOTE!** Linked parameters in general are not relevant for cost scaling. But this is very specific to this breeding scheme in that the linked parameters are the ones with no financial impact but that is nothing general and another breeding scenario might have linked parameters that are in the cost (check how to create a cost cost function)
+
 * `@cheapest_unit_female` Identifying the index of cheapest unit in the breeding program on female side
 * `@cheapest_unit_male` Identifying the index of cheapest unit in the breeding program on male side
- > **NOTE!** The idea of identifying the cheapest unit in the breeding program is at the end of the program all parameters stay within the base budget and by doing this we are making sure that the cost is not spent in the most 	expensive part but rather to the cheapest unit by identifying the index of cheapest parameter on female and male side
+ > **NOTE!** The idea of identifying the cheapest unit in the breeding program is at the end of the program all parameters stay within the base budget and by doing this we are making sure that the cost is not spent in the most 	expensive part but rather to the cheapest unit by identifying the index of cheapest parameter on female and male side	
 * `@cost_cheapest_female` Identifying the cost of cheapest unit in the breeding program on female side
 * `@cost_cheapest_male` identifying the cost of cheapest unit in the breeding program on male side
+* 
+**iterations.csv**
 
-**1.2. iterations.csv**
+The optimization problem's search space varies in size and complexity depending on the number of parameters involved. When dealing with problems that have numerous parameters within a vast search space, it is crucial to carefully select the number of parents and offspring. This selection process ensures that potentially valuable solutions are not lost too early, and that the optimization process does not converge too quickly. To address this, the user can utilize a table to define different parameter settings based on the complexity of the problem. By breaking down the iterations interval, the user can initially generate more parents and offspring, gradually decreasing the numbers as better solutions are found. 
 
-The optimization problem's search space varies in size and complexity depending on the number of parameters involved. When dealing with problems that have numerous parameters within a vast search space, it is crucial to carefully select the number of parents and offspring. This selection process ensures that potentially valuable solutions are not lost too early, and that the optimization process does not converge too quickly. To address this, the user can utilize a table to define different parameter settings based on the complexity of the problem. By breaking down the iterations interval, the user can initially generate more parents and offspring, gradually decreasing the numbers as better solutions are found.
+| iteration_start      | iteration_end | n_sel_high_target | n_sel_kernel | n_sel_last2 | n_off_recombination | n_off_mutation | n_off_random | nrep |
+|----------------------|---------------|-------------------|--------------|-------------|----------------------|----------------|--------------|------|
+| 2                    | 3             | 70                | 30           | 0           | 200                  | 0              | 0            | 1    |
+| 4                    | 30            | 30                | 15           | 5           | 170                  | 80             | 0            | 1    |
+| 31                   | 50            | 20                | 7            | 3           | 150                  | 60             | 60           | 2    |
 
-Plugins:
-
+These parameter configurations have proven effective in our toy example breeding program.
 * `@iteration_start` What parameter settings in which iteration should be used in the interval between iteration_start and iteration_end
 * `@iteration_end` What parameter settings in which iteration should be used in the interval between iteration_start and iteration_end
 * `@n_sel_high_target` Number of selected parents for the current iteration based on high performance
@@ -674,35 +740,53 @@ Plugins:
 * `@n_sel_last2` Number of parents from two cycles before (which should be set to 0 for the second iterations)
 * `@n_off_recombination` Number of offspring generated through recombination
 * `@n_off_mutation` Number of offspring produced through mutation
-* `@n_off_random` Number of offspring generated completely from scratch
->  **n_off_random** is associated with the `generate_new` function found in the [function folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main), where the user has the ability to design a new range for decision variables and to dynamically adjust the range of decision variables based on the ongoing analysis of the optimization process. By examining the results obtained in each iteration, the user can fine-tune and redefine the acceptable ranges for the decision variables. This enables the optimization algorithm to explore different regions of the search space and potentially discover more optimal solutions. Due to the unexplored nature of the search space, it is not advisable to activate this functionality in the early stages.
 * `@nrep` Number of replications, which specifies how many times the same simulation should be performed with different random seeds. As the optimization process progresses in later stages, it is advisable to increase the number of replications. This helps to reduce the variance of the stochastic simulation output, providing more reliable and accurate results.
+* `@n_off_random` Number of offspring generated completely from scratch
 
-> **Final Termination criteria:** If the the pipeline does not achieve convergence based on different criteria in evolutionary algorithm, the pipeline will stop when the last number of iterations in the table for the last row in the iteration_end is reached.
+>  **n_off_random** is associated with the `generate_new` function found in the [function folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/Functions), where the user has the ability to design a new range for decision variables and to dynamically adjust the range of decision variables based on the ongoing analysis of the optimization process. By examining the results obtained in each iteration, the user can fine-tune and redefine the acceptable ranges for the decision variables. This enables the optimization algorithm to explore different regions of the search space and potentially discover more optimal solutions. Due to the unexplored nature of the search space, it is not advisable to activate this functionality in the early stages.
 
-**2. Function [folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/functions)**
+**Function [folder](https://github.com/AHassanpour88/BASF_Hybrid_Wheat/tree/main/functions)**
 
-**2.1. cost_function**
+**cost_function**
 
-The cost_function is an essential function that requires user modification. This function is responsible for generating a cost function which calculates the cost associated with each parameter. In case there is a constraint on the cost scale, the function adjusts the parameters accordingly. It ensures that the parameters remain within the specified cost range. For instance, if the cost exceeds the upper limit, the function automatically scales down all parameters to bring them within the acceptable range. 
+The cost_function is an essential function that requires user modification. This function is responsible for generating a cost function which calculates the cost associated with each parameter. In case there is a constraint on the cost scale, the function adjusts the parameters accordingly. It ensures that the parameters remain within the specified cost range. For instance, if the cost exceeds the upper limit, the function automatically scales down all parameters to bring them within the acceptable range. Creating a cost function involves defining a mathematical expression that quantifies the expenses or constraints associated with a particular task or system.  Let's consider a cost function for a breeding program:
 
-**2.2. generate_new**
+```{r}
+# Define a cost function for a breeding program
+calc_cost <- function(genetic_factors) {
+  
+  # Genetic factors:
+  # genetic_factors[1]: Cost per unit of high-quality seeds
+  # genetic_factors[2]: Maintenance cost for optimal growing conditions
+  # genetic_factors[3]: Labor cost for genetic analysis
+  
+  # Calculate the breeding program cost based on the given genetic factors
+  breeding_cost <- genetic_factors[1] * 5000 + 
+                   genetic_factors[2] * 10000 + 
+                   genetic_factors[3] * 3000
+  
+  return(unname(breeding_cost))
+}
+# Example usage:
+# Suppose the cost per unit of high-quality seeds is 0.50, maintenance cost is 1.00, and labor cost for genetic analysis is 0.30
+genetic_factors_example <- c(0.50, 1.00, 0.30)
+calc_cost(genetic_factors_example)
+```
+The breeding program cost is then calculated using a formula that combines these genetic factors. 
 
-The generate_new function is responsible for creating new offspring from scratch and requires user modification. This functionality can be activated in the iterations.csv [file](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/config/iterations.csv) by setting the value of 'n_off_random' to the desired number of offspring. Our algorithm incorporates a random search criterion that can be employed to prioritize exploration rather than solely focusing on exploiting the search space. By reducing the influence of other selection criteria and increasing the weight assigned to random search, the algorithm becomes more adept at thoroughly exploring a vast search space. This becomes particularly crucial in later iterations where the likelihood of becoming trapped in local optima is higher. By activateing this criterion, the algorithm gains the ability to uncover unexpected solutions that may have been overlooked during the initialization phase. To enhance flexibility, users have the option to define new boundaries for decision variables based on previous results or extend the search beyond the initial parameter bounds in [sampleScript](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/scripts/sampleScript.r). This enables a more targeted exploration of the solution space and the discovery of new solutions that might have been disregarded in earlier iterations.
+In the context of a breeding program, it's common that not all parameters being optimized directly contribute to the cost. Some parameters, even though they play a role in the breeding process, might not incur additional expenses. Therefore, it's important to ensure that only those parameters associated with a cost are considered in the cost function. 
 
+**generate_new**
 
-**2.3. kernel_smoothing**
+The generate_new function is responsible for creating new offspring from scratch and requires user modification. This functionality can be activated in the iterations.csv [file](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/config/iterations.csv) by setting the value of 'n_off_random' to the desired number of offspring. Our algorithm incorporates a random search criterion that can be employed to prioritize exploration rather than solely focusing on exploiting the search space. By reducing the influence of other selection criteria and increasing the weight assigned to random search, the algorithm becomes more adept at thoroughly exploring a vast search space. This becomes particularly crucial in later iterations where the likelihood of becoming trapped in local optima is higher. By activateing this criterion, the algorithm gains the ability to uncover unexpected solutions that may have been overlooked during the initialization phase. To enhance flexibility, users have the option to define new boundaries for decision variables based on previous results or extend the search beyond the initial parameter bounds in [sampleScript](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/scripts/sampleScript.r). This enables a more targeted exploration of the solution space and the discovery of new solutions that might have been disregarded in earlier iterations.
 
-This function plays a crucial role in the evolutionary algorithm by selecting parents based on the highest average value of the target function using kernel regression.  This function is utilized in various parts of the evolutionary algorithm and should not be modified by the user. Interested readers can find detailed information on the utilization of a kernel regression in our [recent paper](g3 link), where we have provided an in-depth explanation of kernel regression model. 
+**termination_riteria:**
+to limit computational time before reaching a maximum number of iterations, we defined dual termination criteria based on the average and standard deviation  thresholds for the objective function through a kernel regression applied to the most promising candidate parameters in each iteration. The termination criterion is satisfied when both the mean and standard deviation of the best solutions from the last five iterations are below predefined threshold values. Determining suitable threshold values for these measurements involves considering the problem-specific characteristics, desired optimization precision, and computational resources available for the optimization process. If the the pipeline does not achieve convergence based on these criteria in evolutionary algorithm, the pipeline will stop when the last number of iterations in the table for the last row in the iteration_end is reached. In general, it is recommended that the decision-makers regularly evaluate and track the progress of the algorithm across different iterations based on **EvoStatus.RData** and adjust the termination criteria during the algorithm's development and implementation. If a user determines that the final termination criterion is insufficient and wishes to continue the process, they should consider the following actions:
 
-**2.4.  dnorm_approx**
+1- Remove the `rplot.pdf` file from the main folder to avoid any conflicting data.
 
-This function is a faster version of dnorm(). User should not modify this function. 
-
-**2.5. density_smoothing** 
-
-This function plays a crucial role in the evolutionary algorithm for termination criteria.
+2- Adjust and increase the number of iterations in the [iterations.csv](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/config/iterations.csv).
 
 ### Acknowledgment
 
-This research was supported by BASF Belgium Coordination Center.
+This research was supported by BASF Belgium Coordination Center CommV.
