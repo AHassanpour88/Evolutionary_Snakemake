@@ -1,72 +1,82 @@
-# How many parameters do we want to optimize?
+# How many parameters we want to optimize?
 nfactors: 4
 
-# binary == class variable
-# Do we have binary variables?
+# Do we have binary/class variables?
 binary_parameter: TRUE
 number_binary_parameter: 1
 binary: [FALSE, FALSE, FALSE, TRUE]
 
-# Here parameter settings based on their positions get an index
+# Which parameters should be integer??
+integer: [TRUE, TRUE, TRUE, TRUE]
+
+# Name of parameters we want to optimize?
 name_parameter:
   - "n_test" 
   - "n_bull"
   - "n_bull_sel"
   - "MIR"
 
-# The number of initial simulations that we need to sample from can be specified within the sampleScript 
-sim_init: 600 #big enough that we have good coverage on search space!
-#path of the scripts for Snakemake! Do not change the pathes of the scripts!
+# number of initial simulation that we need to sample from can be specified within the sampleScript 
+sim_init: 600 #big enough that we have a good coverage on search space!
 sampleScript: "scripts/sampleScript.r"
 # adapt your silumation script in simuScript
-# please change to simuScript_fast.r if you only want to test the pipeline!!!!
 simuScript: "scripts/simuScript.r"
 # Evolutionary algorithm 
 evoScript: "scripts/evoScript.r"
 evoParams: "config/iterations.csv"
-simuParams: "config/simuInfo.csv"
-# Visualizing convergence for each parameter
+# plotting a new points
 visualizeParameters: "scripts/visualizeParameters.r"
-# time in minutes (calculations are evaluated in the script)
+# time in minuites (calculations are evaluated in script)
 time: 1*1*60
-# memory in Mb (calculations are evaluated in the script)
-memory: 7*1000 
+# memory in Mb (calculations are evaluated in script)
+memory: 5*1000 
 
-
-# minimum range of mutation, if the variation was low, depends on the range of parameter
-min_range_mut: [40, 20, 3, 0,01]
+# minimum range of mutation if the variation was low depends on the range of parameter#3 then 2 iter 18
+min_range_mut:  [40, 20, 3, 0.01]
 
 # mutation probability of offspring
 mut_offspring: 0.2
 #mutation probability of parents
 mut_parent: 0.3
 
-# If you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters
-# Find the linked_parameter if statement in the evoScript and adapt the number of parameters linked 
-linked_parameter: TRUE
-linked_parameter_adjustment: FALSE 
-linked_parameter_male:  [2, 1]
-linked_parameter_female: [1, 2]
-
-num_linked_parameter: 1
-
+# initial cost of the program to be calculated based on each parameter
 # Only parameters that are included in cost functions will be used and then
 # initial cost of the program to be calculated based on each parameter
 # In this toy example as the cost is as constraint does not really matter the value of x1:x4 as long as the x_1(4000 + 1000x_4) + 3000x_2 - 10000000 < 0 is statisfied
 # this is more important in larger breeding program that alternative scenarios compare to the current breeding program and cost is included in objective function
-base_cost_ini:  [2368, 175 ,19 ,0]
+base_cost_ini: [2368, 175 ,19 ,0]
 
 # The binary variables and linked parameters are not included in rounding in light of the constraints
 # These parameters will be used so that after sampling and generating offspring from scratch we stay within the budget
 cost_par: [1,2]
 
+# If you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters
+# Find the linked_parameter if statement in the evoScript and adapt the number of parameters linked 
+linked_parameter: TRUE
+linked_parameter_adjustment: FALSE 
+
+################# Hybrid ##########################
+Hybrid_Breeding: TRUE
+linked_parameter_male:  [2, 1] # the fisrt parameter is the one that other parameters are after that linked to
+linked_parameter_female: [1, 2] 
+num_linked_parameter_male: 1
+num_linked_parameter_female: 1
 cheapest_unit_female: [1]
 cheapest_unit_male: [2]
 
-# Calculate the cheapest cost of a parameter using the cost function in Function folder
+# Cheapest cost of a parameter using the cost function in Function folder
 cost_cheapest_male: 3000
 cost_cheapest_female: 4000
+
+#################### Line ##########################
+Line_Breeding: FALSE
+num_linked_parameter: 0
+which_linked_parameter:  [0, 0]
+cheapest_unit: [0]
+cost_cheapest: 0
 
 # For visualization, if you already know what is your target is
 my_target: TRUE
 target: [2368, 175, 19, 0]
+
+
