@@ -261,7 +261,7 @@ if(iteration == 2){
   mut_parent = evolutionary_log$mut_parent[,iteration - 2]
 
   #### when refinement is reached binary variable is fixed!
-  if(binary_parameter){
+  if(binary_parameter & iteration >2){
     if(ncol(evolutionary_log$center)>4){
       to_test = which(evolutionary_log$binary)
 
@@ -400,27 +400,7 @@ while(selected < n_sel_high_target){
   }
   activ_indi <- activ_indi + 1
 }
-################################################################################
-####################### Select parents3: second to last run ####################
-################################################################################
-cat("  Start collecting Parent 3 \n")
 
-if(use_second_last){
-  selected <- 0
-  results_old <- results_old[sort(results_old[,ncol(results_old)], index.return=TRUE, decreasing = TRUE)$ix,]
-  activ_indi <- 1
-  parents_list3 <- NULL
-  parents_sofar <- rbind(parents_list1[,param_cols])
-  while(selected < n_sel_last2){
-    if(sum(colSums(t(parents_sofar)==results_old[activ_indi,param_cols])==length(param_cols))==0){
-      parents_list3 <- rbind(parents_list3, results_old[activ_indi,])
-      selected <- selected + 1
-    }
-    activ_indi <- activ_indi +1
-  }
-} else{
-  parents_list3 <- NULL
-}
 ################################################################################
 ####################### Select parents2: based on smoothing ####################
 ################################################################################
@@ -446,8 +426,7 @@ if(n_sel_kernel>0){
   activ_indi <- 2
   while(selected < n_sel_kernel){
     cand[activ_indi,]
-    consider_distance = rbind(parents_list1, parents_list3, parents_list2)
-    consider_distance =  parents_list2
+    consider_distance = rbind(parents_list1, parents_list2)
     distance <- numeric(nrow(consider_distance))
     for(index in 1:length(param_cols)){
       distance <- distance + ((consider_distance[,param_cols[index]] - cand[activ_indi, param_cols[index]])/range[index])^2
@@ -457,10 +436,10 @@ if(n_sel_kernel>0){
     # So relatively close values will be more similar, to just have some coverage of the population we increased a bit
     #
     if(min(distance) > (length(param_cols) * 0.2 * distance_factor)){
-
-      # print(rbind(cand[activ_indi,], parents_list1[which.min(distance),]))
-      # print(min(distance))
-
+      
+      print(rbind(cand[activ_indi,], consider_distance[which.min(distance),]))
+      print(min(distance))
+      
       parents_list2 <- rbind(parents_list2, cand[activ_indi,])
       selected <- selected + 1
       id_selected =  c(id_selected, which.max(colSums(cand[activ_indi,]==t(results_new))))
@@ -469,6 +448,63 @@ if(n_sel_kernel>0){
   }
 } else{
   parents_list2 <- NULL
+}
+################################################################################
+####################### Select parents3: second to last run ####################
+################################################################################
+if(use_second_last){
+  
+  current_max1 = numeric(nrow(parents_list1))
+  for(index in 1:nrow(parents_list1)){
+    current_max1[index] = approx_f(parents_list1[index, param_cols], range_smooth/2, results_smooth)
+  }
+  
+  
+  current_max2 = numeric(nrow(parents_list2))
+  for(index in 1:nrow(parents_list2)){
+    current_max2[index] = approx_f(parents_list2[index, param_cols], range_smooth/2, results_smooth)
+  }
+  
+  current_max = max(c(current_max1, current_max2))
+  
+  previous_optima = numeric(ncol(evolutionary_log$convergence))
+  for(index in 1:ncol(evolutionary_log$convergence)){
+    previous_optima[index] = approx_f(evolutionary_log$convergence[param_cols,index], range_smooth/2, results_smooth)
+  }
+  
+  selected <- 0
+  results_old <- results_old[sort(results_old[,ncol(results_old)], index.return=TRUE, decreasing = TRUE)$ix,]
+  
+  if(max(previous_optima) > current_max){
+    
+    add_optima = t(evolutionary_log$convergence[param_cols, previous_optima > current_max])
+    add_optima_value = previous_optima[previous_optima > current_max]
+    
+    add_optima = unique(cbind(add_optima, add_optima_value)[sort(add_optima_value, index.return = TRUE, decreasing = TRUE)$ix,])
+    results_old = rbind(add_optima, results_old)
+    
+    
+  }
+  activ_indi <- 1
+  parents_list3 <- NULL
+  
+  if(length(parents_list2) > 0){
+    parents_sofar <- rbind(parents_list1[,param_cols], parents_list2[,param_cols])
+    
+  } else{
+    parents_sofar <- rbind(parents_list1[,param_cols])
+    
+  }
+  
+  while(selected < n_sel_last2){
+    if(sum(colSums(t(parents_sofar)==results_old[activ_indi,param_cols])==length(param_cols))==0){
+      parents_list3 <- rbind(parents_list3, results_old[activ_indi,])
+      selected <- selected + 1
+    }
+    activ_indi <- activ_indi +1
+  }
+} else{
+  parents_list3 <- NULL
 }
 
 ################################################################################
@@ -504,7 +540,11 @@ if(iteration > 2){
   # most important parameters
   nfreq = sum(!is_binary)
   for(index5 in to_check){
-    x = evolutionary_log$center[,index5]
+    x = numeric(ncol(parents_list)-1)
+    for(tt in 1:(ncol(parents_list)-1)){
+      x[tt] = median(parents_list[,tt])
+    }
+    #x = evolutionary_log$center[,index5]
     x_value = approx_f(x, bw = range, results_smooth)
     for(index in which(!is_binary)){
       x_new = x
@@ -517,6 +557,7 @@ if(iteration > 2){
       change2[index] = x_value - x_new2_value
       if(x_new_value > x_value){
         prob[index] = prob[index] + 0.03
+        
       }
       if(x_new2_value > x_value){
         prob[index] = prob[index] - 0.03
@@ -532,15 +573,49 @@ if(iteration > 2){
   change = abs(change1 - change2)
   to_change = sort(change, index.return=TRUE, decreasing = TRUE)
   if(nfreq > 5){
-    mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] = mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] * 2
-    mut_parent_temp[to_change$ix[1:round(nfreq/5)]] = mut_parent_temp[to_change$ix[1:round(nfreq/5)]] * 2
+    mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] = mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
+    mut_parent_temp[to_change$ix[1:round(nfreq/5)]] = mut_parent_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
     # less important parameters
     mut_offspring_temp[to_change$ix[round(nfreq/2+1):nfreq]] = mut_offspring_temp[to_change$ix[round(nfreq/2+1):nfreq]] / 2
     mut_parent_temp[to_change$ix[round(nfreq/2+1):nfreq]] = mut_parent_temp[to_change$ix[round(nfreq/2+1):nfreq]] / 2
   }
-  # Any mutation probability greater than 0.5 is automatically set to 0.5
-  mut_offspring_temp[mut_offspring_temp>0.5] = 0.5
-  mut_parent_temp[mut_parent_temp>0.5] = 0.5
+  # Any mutation probability greater than 0.4/0.3 is automatically set to 0.4/0.3
+  mut_offspring_temp[mut_offspring_temp>0.3] = 0.3
+  mut_parent_temp[mut_parent_temp>0.4] = 0.4
+}
+
+#### when refinement is reached binary variable is fixed!
+if(binary_parameter & iteration >2){
+  if(ncol(evolutionary_log$center)>4){
+    to_test = which(evolutionary_log$binary)
+    
+    for(bven in to_test){
+      
+      cutoff1 = max(mut_offspring_temp[bven], mut_parent_temp[bven])
+      
+      fixed_center = sum(evolutionary_log$center[bven,(ncol(evolutionary_log$center)-4):ncol(evolutionary_log$center)]> (1-cutoff1) |  evolutionary_log$center[bven,(ncol(evolutionary_log$center)-4):ncol(evolutionary_log$center)]<(cutoff1))
+      fixed_selected = sum(evolutionary_log$parent_center[bven,(ncol(evolutionary_log$parent_center)-4):ncol(evolutionary_log$parent_center)]>(1-cutoff1*0.75) |  evolutionary_log$parent_center[bven,(ncol(evolutionary_log$parent_center)-4):ncol(evolutionary_log$parent_center)]<(cutoff1*0.75))
+      
+      # reduce mutation probability by 50%
+      if(fixed_center==5 && fixed_selected == 5){
+        mut_offspring_temp[bven] = mut_offspring_temp[bven]/2
+        mut_parent_temp[bven] = mut_parent_temp[bven]/2
+      }
+      
+      cutoff2 = max(mut_offspring_temp[bven], mut_parent_temp[bven])
+      
+      fixed_center = sum(evolutionary_log$center[bven,(ncol(evolutionary_log$center)-4):ncol(evolutionary_log$center)]> (1-cutoff2) |  evolutionary_log$center[bven,(ncol(evolutionary_log$center)-4):ncol(evolutionary_log$center)]<(cutoff2))
+      fixed_selected = sum(evolutionary_log$parent_center[bven,(ncol(evolutionary_log$parent_center)-4):ncol(evolutionary_log$parent_center)]>(1-cutoff2*0.75) |  evolutionary_log$parent_center[bven,(ncol(evolutionary_log$parent_center)-4):ncol(evolutionary_log$parent_center)]<(cutoff2*0.75))
+      
+      # reduce mutation probability to 1%
+      if(fixed_center==5 && fixed_selected == 5){
+        mut_offspring_temp[bven] = 0.01
+        mut_parent_temp[bven] = 0.01
+      }
+      
+      
+    }
+  }
 }
 # Check mean/sd to avoid testing parameter settings that are extremely bad
 # Currently this is only applied to n_off_random individuals
@@ -653,7 +728,7 @@ for(index in (n_off1 + 1):n_off){
       }
     }
     
-    off <- round(off, digits = 3)
+    # off <- round(off, digits = 3)
 
         # Round only the columns identified by is_integer
     off[which(is_integer)] <- round(off[which(is_integer)])
@@ -786,18 +861,19 @@ for(index in (n_off1 + 1):n_off){
     ######### Please adopt this part depending on your breeding program ############
     ############################## keeping constraints #############################
     ################################################################################
+    # 
+    # if (off[1] > off[2] && off[3] > off[4] && off[4] > off[5] && off[3] <= 900 && off[4] <= 100 && off[5] <= 25 && off[6] <= 30 && off[5] >= 5 && off[6] >= 5) {
+    #   # if (off[1] > off[2] && off[5] <= 25 && off[5]  >= 5 && off[4] <= 80 && off[6] <= 40 && off[3] <= 800) {
+    #   # print("All conditions for contrains are satisfied.")
+    #   valid <- TRUE
+    #   attempt <- 1
+    # } else {
+    #   valid <- FALSE
+    #   attempt <- attempt + 1
+    #   # print("Not all conditions for contrains are satisfied.")
+    # 
+    # }
     
-# if (some constraints that should be hold) {
-#   # print("All conditions for contrains are satisfied.")
-#   valid <- TRUE
-#   attempt <- 1
-# } else {
-#   valid <- FALSE
-#   attempt <- attempt + 1
-#   # print("Not all conditions for contrains are satisfied.")
-#   
-# }
-
     ################################################################################
 
     
