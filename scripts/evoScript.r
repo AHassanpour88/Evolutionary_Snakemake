@@ -259,23 +259,6 @@ if(iteration == 2){
 
   mut_offspring = evolutionary_log$mut_offspring[,iteration - 2]
   mut_parent = evolutionary_log$mut_parent[,iteration - 2]
-
-  #### when refinement is reached binary variable is fixed!
-  if(binary_parameter & iteration >2){
-    if(ncol(evolutionary_log$center)>4){
-      to_test = which(evolutionary_log$binary)
-
-      for(bven in to_test){
-        fixed_center = sum(evolutionary_log$center[bven,(ncol(evolutionary_log$center)-4):ncol(evolutionary_log$center)]>0.8 |  evolutionary_log$center[bven,(ncol(evolutionary_log$center)-4):ncol(evolutionary_log$center)]<0.2)
-        fixed_selected = sum(evolutionary_log$parent_center[bven,(ncol(evolutionary_log$parent_center)-4):ncol(evolutionary_log$parent_center)]>0.85 |  evolutionary_log$parent_center[bven,(ncol(evolutionary_log$parent_center)-4):ncol(evolutionary_log$parent_center)]<0.15)
-
-        if(fixed_center==5 && fixed_selected){
-          mut_offspring[bven] = 0.01
-          mut_parent[bven] = 0.01
-        }
-      }
-    }
-  }
 }
 
 # Total number of offspring to generate
@@ -478,12 +461,27 @@ if(use_second_last){
   if(max(previous_optima) > current_max){
     
     add_optima = t(evolutionary_log$convergence[param_cols, previous_optima > current_max])
-    add_optima_value = previous_optima[previous_optima > current_max]
+    target_function = previous_optima[previous_optima > current_max]
     
-    add_optima = unique(cbind(add_optima, add_optima_value)[sort(add_optima_value, index.return = TRUE, decreasing = TRUE)$ix,])
+    add_optima = unique(cbind(add_optima, target_function)[sort(target_function, index.return = TRUE, decreasing = TRUE)$ix,])
+    
+    #####################
+    add_optima_df <- as.data.frame(add_optima)
+    
+    # fill missing columns with zeros and reorder them because add_optima has different structure
+    fill_missing_and_reorder <- function(df, ref_df) {
+      missing_cols <- setdiff(colnames(ref_df), colnames(df))
+      for (col in missing_cols) {
+        df[[col]] <- 0
+      }
+      df <- df[, colnames(ref_df), drop = FALSE]  
+      return(df)
+    }
+    
+    add_optima <- fill_missing_and_reorder(add_optima_df, results_old)
+    row.names(add_optima) <- NULL
+    ################################
     results_old = rbind(add_optima, results_old)
-    
-    
   }
   activ_indi <- 1
   parents_list3 <- NULL
@@ -518,9 +516,9 @@ new_setting <- matrix(0, nrow=n_off, ncol=length(param_cols))
 
 if(is.null(parents_list3)) {
   n_sel <- nrow(parents_list)
-  new_setting[1:n_sel,] <- parents_list[,param_cols]
+  new_setting[1:n_sel,] <- as.matrix(parents_list[,param_cols])
 }else{
-  new_setting[1:n_sel,] <- parents_list[,param_cols]
+  new_setting[1:n_sel,] <- as.matrix(parents_list[,param_cols])
 }
 
 prob = rep(0.5, nfactors)
@@ -570,7 +568,8 @@ if(iteration > 2){
       }
     }
   }
-  change = abs(change1 - change2)
+  change = change1
+  change[change2 > change1] = change2[change2 > change1]
   to_change = sort(change, index.return=TRUE, decreasing = TRUE)
   if(nfreq > 5){
     mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] = mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
@@ -680,7 +679,7 @@ for(index in (n_off1 + 1):n_off){
 
 
       for(index2 in param_cols[is_binary]){
-        if(rbinom(1,1,mut)==1){
+        if(rbinom(1,1,mut[index2])==1){
           off[index2] <- 1- off[index2]
         }
       }
@@ -690,7 +689,7 @@ for(index in (n_off1 + 1):n_off){
     ################################################################################
     # For continuous variable first calculate the range
     for(index2 in param_cols[!is_binary]){
-      if(rbinom(1,1,mut)==1){
+      if(rbinom(1,1,mut[index2])==1){
         ## Mutation can be by +two times of it the sd of a parameter and -two times  of it
         range_mut <- max((range_smooth[index2]*2), min_range_mut[index2])
 
@@ -738,6 +737,7 @@ for(index in (n_off1 + 1):n_off){
     {
       base_cost_ini <- unlist(config$base_cost_ini)
       base_cost <- calc_cost(base_cost_ini) 
+      off = as.vector(unlist(off))
       new_cost <- calc_cost(off)
       
       index2 <- 1
