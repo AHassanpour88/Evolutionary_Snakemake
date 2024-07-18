@@ -1,3 +1,21 @@
+#################################################################################
+################################# Agreement #####################################
+#################################################################################
+# Authors
+# Azadeh Hassanpour, azadeh.hassanpour@uni-goettingen.de
+# Johannes Geibel, johannes.geibel@fli.de
+# Torsten Pook, Torsten.pook@wur.nl
+# Copyright © 2020 – 2024
+# This program falls under a NonCommercial-NoDerivates-NoDistriubtion Public License.
+# With use of these scripts, I confirm that I represent an academic institute and acknowledge that I shall use this script only for research. I explicitly acknowledge the terms in the license agreement https://github.com/AHassanpour88/Evolutionary_Snakemake/blob/main/License.md. I understood that any commercial use needs a commercial license from the owner of the script. For more information about a commercial license please contact Torsten Pook.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+#################################################################################
+#################################################################################
+#################################################################################
+
 ################## Do not change #################
 args <- commandArgs(TRUE)
 output <- args[1]
@@ -11,11 +29,13 @@ library(data.table)
 library(stringr)
 
 target_density = 30 ## in later iteration we are modifying some steps to achieve convergence nicer
+
 ################################################################################
 ################ Read the config file and Selection Rates ######################
 ################################################################################
 config <- yaml.load_file("config/config.yaml") ### read the parameters of user
 evoParameters <- fread(config$evoParams) ### read the selection intensity and number of parents and offspring that generates in each iteration
+
 
 is_hybrid_breeding <- config$Hybrid_Breeding
 is_line_breeding <- config$Line_Breeding
@@ -33,80 +53,95 @@ n_sel_last2 <- evoParameters$n_sel_last2[sel_tmp_row]
 n_sel <- n_sel_high_target + n_sel_kernel + n_sel_last2
 n_off1 <- n_sel
 
-# how many offspring should be made with recombination approach
+# how many offspring should be made with combination approach
 n_off_recombination <- evoParameters$n_off_recombination[sel_tmp_row]
 # how many offspring should be made with mutation approach
 n_off_mutation <- evoParameters$n_off_mutation[sel_tmp_row]
 # how many offspring should be made with random approach
+# this is not applied in our dairy cattle example due to the simplicity of the search space
 n_off_random <- evoParameters$n_off_random[sel_tmp_row]
 
-# how many times simulation sould be replicated?
+# how many times simulation should be replicated?
+# although the table provides you a generation of new settings from iteration 2, be aware that if you set the number of replications to more than one, the first iteration (which is usually is a large number) also will be use this replication number!
 n_rep <- evoParameters$nrep[sel_tmp_row]
 
-#how many parameters we have?
+# how many parameters we have?
 nfactors <- config$nfactors
 
-#treshold for termination criteria
+# Threshold for termination criteria
+# only applies if you are setting this termination criteria 
+# we did not use any termination criteria for our dairy cattle example
 thresh_target_ave <- config$thresh_target_ave
 thresh_target_sd <- config$thresh_target_sd
 
-#how many binary parameters we have? Select the binary variables
+# how many binary parameters we have? Select the binary variables
 number_binary_parameter <- config$number_binary_parameter
 binary_parameter <- config$binary_parameter
 is_binary <- binary <- config$binary
+
+# which parameters should be treated as integer?
 is_integer <- config$integer
+
+# which parameters are affecting the cost of breeding programs?
+# Necessarily not all parameters are in the cost function
 cost_par <- config$cost_par
 
 # do we have linked parameter? which one?
 linked_parameter <- config$linked_parameter
 linked_parameter_adjustment <- config$linked_parameter_adjustment
 
-  if(is_hybrid_breeding){
-    
-    cheapest_unit_female <- config$cheapest_unit_female
-    cheapest_unit_male <- config$cheapest_unit_male
-    
-    cost_cheapest_female <- config$cost_cheapest_female
-    cost_cheapest_male <- config$cost_cheapest_male
-    
-    if(linked_parameter){
-    num_linked_parameter_male <- config$num_linked_parameter_male
+
+
+if(is_hybrid_breeding){
+  
+  cheapest_unit_female <- config$cheapest_unit_female
+  cheapest_unit_male <- config$cheapest_unit_male
+  
+  cost_cheapest_female <- config$cost_cheapest_female
+  cost_cheapest_male <- config$cost_cheapest_male
+  
+  if(linked_parameter){
+    num_linked_parameter_male <- config$num_linked_parameter_male # how many parameters linked to another parameter
     num_linked_parameter_female <- config$num_linked_parameter_female
     
     linked_parameter_male <- config$linked_parameter_male
     linked_parameter_female <- config$linked_parameter_female
-
-    param_link_male <- linked_parameter_male[-1]
-    linked_param_male <- linked_parameter_male[1]
+    
+    param_link_male <- linked_parameter_male[-1] # parameters that are link to main parameter
+    linked_param_male <- linked_parameter_male[1] # main parameter
     
     param_link_female <- linked_parameter_female[-1]
     linked_param_female <- linked_parameter_female[1]
     
-    }
   }
+}
 
-    if(is_line_breeding){
-    
-    cheapest_unit <- config$cheapest_unit
-    cost_cheapest <- config$cost_cheapest
-    
-    if(linked_parameter){
+if(is_line_breeding){
+  
+  cheapest_unit <- config$cheapest_unit
+  cost_cheapest <- config$cost_cheapest
+  
+  if(linked_parameter){
     num_linked_parameter <- config$num_linked_parameter
     linked_parameter_line <- config$which_linked_parameter
     
     param_link <- linked_parameter_line[-1]
     linked_param <- linked_parameter_line[1]
-
-    }
+    
   }
+}
 # minimum amount of mutation that you allow for each parameter
+# This is only to ensure that you have beneficial mutation all the time
 min_range_mut <- unlist(config$min_range_mut)
+
 #how close the solutions should be
 distance_factor <- 0.4
-diff = 2 #bandwidth of convergence
+diff = 2 # bandwidth of convergence
+
 ################################################################################
 ####################### EvoStatus: load or create ##############################
 ################################################################################
+# the Evostatus save all the information during the optimization process
 Status <- "./EvoStatus"
 if(!dir.exists(Status)){
   dir.create(Status)
@@ -115,20 +150,22 @@ if(!dir.exists(Status)){
 ############################## General functions ##############################
 ################################################################################
 # Kernel regression estimation
+# interested reader for this method can read our publication here https://academic.oup.com/g3journal/article/13/12/jkad217/7281644
+
 approx_f <- function(x, bw=1, results_smooth){
-
+  
   distance <- numeric(nrow(results_smooth))
-
-  for(index in 1:(length(param_cols))){ ### only the parameter include in cost - 6 recycle should come out
+  
+  for(index in 1:(length(param_cols))){ 
     distance <- distance + ((results_smooth[,param_cols[index]] - x[param_cols[index]])/bw[index])^2
   }
-
-    weight <- dnorm_approx(sqrt(distance))
-
-
-
+  
+  weight <- dnorm_approx(sqrt(distance))
+  
+  
+  
   target <- sum(results_smooth[,ncol(results_smooth)] * weight) / sum(weight)
-
+  
   return (target)
 }
 
@@ -139,17 +176,17 @@ dnorm_approx <- function(distance, bw = 2){
 
 # Kernel regression density estimation
 approx_density <- function(x, bw=1, results_smooth){
-
+  
   distance <- numeric(nrow(results_smooth))
-
+  
   for(index in 1:(length(param_cols))){
     distance <- distance + ((results_smooth[,param_cols[index]] - x[param_cols[index]])/bw[index])^2
   }
-
+  
   weight <- dnorm_approx(sqrt(distance))
-
+  
   target <-  sum(weight)
-
+  
   return (target)
 }
 ################################################################################
@@ -437,6 +474,8 @@ if(n_sel_kernel>0){
 ################################################################################
 if(use_second_last){
   
+  names_results_old <- colnames(results_old)
+  
   current_max1 = numeric(nrow(parents_list1))
   for(index in 1:nrow(parents_list1)){
     current_max1[index] = approx_f(parents_list1[index, param_cols], range_smooth/2, results_smooth)
@@ -461,27 +500,21 @@ if(use_second_last){
   if(max(previous_optima) > current_max){
     
     add_optima = t(evolutionary_log$convergence[param_cols, previous_optima > current_max])
+    rownames(add_optima) <- NULL
+    
+    column_names_optima <- colnames(add_optima)
     target_function = previous_optima[previous_optima > current_max]
     
     add_optima = unique(cbind(add_optima, target_function)[sort(target_function, index.return = TRUE, decreasing = TRUE)$ix,])
     
-    #####################
-    add_optima_df <- as.data.frame(add_optima)
-    
-    # fill missing columns with zeros and reorder them because add_optima has different structure
-    fill_missing_and_reorder <- function(df, ref_df) {
-      missing_cols <- setdiff(colnames(ref_df), colnames(df))
-      for (col in missing_cols) {
-        df[[col]] <- 0
-      }
-      df <- df[, colnames(ref_df), drop = FALSE]  
-      return(df)
-    }
-    
-    add_optima <- fill_missing_and_reorder(add_optima_df, results_old)
-    row.names(add_optima) <- NULL
-    ################################
+    # names(add_optima) <- c(column_names_optima, "target_function")
+    # add_optima = t(as.matrix(add_optima))
+    # missing_cols <- setdiff(colnames(results_old), colnames(add_optima))
+    # add_optima <- as.data.frame(add_optima)
+    # add_optima[, missing_cols] <- 0
     results_old = rbind(add_optima, results_old)
+    
+    
   }
   activ_indi <- 1
   parents_list3 <- NULL
@@ -504,7 +537,7 @@ if(use_second_last){
 } else{
   parents_list3 <- NULL
 }
-
+# parents_list3 <- parents_list3[, c(setdiff(colnames(parents_list3), "target_function"), "target_function")]
 ################################################################################
 ######################### Collect the list of parents ##########################
 ################################################################################
@@ -543,7 +576,7 @@ if(iteration > 2){
       x[tt] = median(parents_list[,tt])
     }
     #x = evolutionary_log$center[,index5]
-    x_value = approx_f(x, bw = range, results_smooth)
+    x_value = approx_f(x, bw = range_smooth, results_smooth)
     for(index in which(!is_binary)){
       x_new = x
       x_new[index] = x_new[index] + max(range_smooth[index] , min_range_mut[index])
@@ -551,19 +584,18 @@ if(iteration > 2){
       x_new2 = x
       x_new2[index] = x_new2[index] - max(range_smooth[index] , min_range_mut[index])
       x_new2_value = approx_f( x_new2, bw = range_smooth, results_smooth)
-      change1[index] = x_value - x_new_value
-      change2[index] = x_value - x_new2_value
+      change1[index] = x_new_value - x_value
+      change2[index] = x_new2_value - x_value
       if(x_new_value > x_value){
         prob[index] = prob[index] + 0.03
-        
       }
       if(x_new2_value > x_value){
         prob[index] = prob[index] - 0.03
       }
       if(nfreq > 5){
         if((x_new_value < x_value) & (x_new2_value < x_value)){
-          mut_offspring_temp[index] = mut_offspring_temp[index] * 0.75
-          mut_parent_temp[index] = mut_parent_temp[index] * 0.75
+          mut_offspring_temp[index] = mut_offspring_temp[index] * 0.8
+          mut_parent_temp[index] = mut_parent_temp[index] * 0.8
         }
       }
     }
@@ -572,15 +604,16 @@ if(iteration > 2){
   change[change2 > change1] = change2[change2 > change1]
   to_change = sort(change, index.return=TRUE, decreasing = TRUE)
   if(nfreq > 5){
-    mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] = mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
-    mut_parent_temp[to_change$ix[1:round(nfreq/5)]] = mut_parent_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
+    if(max(change)>0){
+      mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] = mut_offspring_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
+      mut_parent_temp[to_change$ix[1:round(nfreq/5)]] = mut_parent_temp[to_change$ix[1:round(nfreq/5)]] * 1.5
+    }
     # less important parameters
-    mut_offspring_temp[to_change$ix[round(nfreq/2+1):nfreq]] = mut_offspring_temp[to_change$ix[round(nfreq/2+1):nfreq]] / 2
-    mut_parent_temp[to_change$ix[round(nfreq/2+1):nfreq]] = mut_parent_temp[to_change$ix[round(nfreq/2+1):nfreq]] / 2
+    if(median(change) < 0){
+      mut_offspring_temp[to_change$ix[round(nfreq/2+1):nfreq]] = mut_offspring_temp[to_change$ix[round(nfreq/2+1):nfreq]] / 2
+      mut_parent_temp[to_change$ix[round(nfreq/2+1):nfreq]] = mut_parent_temp[to_change$ix[round(nfreq/2+1):nfreq]] / 2
+    }
   }
-  # Any mutation probability greater than 0.4/0.3 is automatically set to 0.4/0.3
-  mut_offspring_temp[mut_offspring_temp>0.3] = 0.3
-  mut_parent_temp[mut_parent_temp>0.4] = 0.4
 }
 
 #### when refinement is reached binary variable is fixed!
@@ -643,9 +676,12 @@ for(index in (n_off1 + 1):n_off){
       parents <- sample(1:n_sel, 2)
       if(index > (n_off1 + n_off_recombination)){
         parents <- rep(index%%n_sel+1,2)
-        mut <- mut_parent_temp # 30%
+        mut <- mut_parent_temp 
+        if(binary_parameter){
+          mut[is_binary] = mut[is_binary] * (1-0.5 * redo_probability)
+        }
       } else{
-        mut <- mut_offspring_temp # 10
+        mut <- mut_offspring_temp 
       }
 
       # Each parent used the same with the same frequency
@@ -727,7 +763,6 @@ for(index in (n_off1 + 1):n_off){
       }
     }
     
-    # off <- round(off, digits = 3)
 
         # Round only the columns identified by is_integer
     off[which(is_integer)] <- round(off[which(is_integer)])
@@ -752,9 +787,6 @@ for(index in (n_off1 + 1):n_off){
       ########################## Adjust linked_parameters ############################
       ################################################################################
 
-      if(linked_parameter_adjustment){
-        # add the necessary adjustment
-      }
 
       ################################################################################
       ################## Compensate the rest in the cheapest unit #####################
@@ -835,21 +867,16 @@ for(index in (n_off1 + 1):n_off){
         tt <- tt + 1
 
         if(is.na(est_value)){
-          est_value = thres # no points in the area - investigate
+          est_value = thres 
         }
       }
     }
 
 
     is_copy <- sum(colSums(t(new_setting)==off)==nfactors)>0
-    # is_cor <- (sum(off[3:8] > 0)==6) & (off[3]>=off[5]) & (off[4]>=off[6]) & (off[5]>=off[7]) & (off[6]>=off[8])
 
     is_cor <- (sum(off[which(!is_binary)] > 0)==nfactors-number_binary_parameter)
 
-
-
-
-    #    if(((sum(off>0)==3 & off[2]<=700 & off[2]>=100) & !is_copy)||attempt > 100 & min(distance)>0.1){
     if((!is_copy  && min(distance)>(0.05 * nfactors * distance_factor) && is_cor)||attempt > 100){
       valid <- TRUE
       attempt <- 1
@@ -861,19 +888,21 @@ for(index in (n_off1 + 1):n_off){
     ######### Please adopt this part depending on your breeding program ############
     ############################## keeping constraints #############################
     ################################################################################
-    # 
-    # if (off[1] > off[2] && off[3] > off[4] && off[4] > off[5] && off[3] <= 900 && off[4] <= 100 && off[5] <= 25 && off[6] <= 30 && off[5] >= 5 && off[6] >= 5) {
-    #   # if (off[1] > off[2] && off[5] <= 25 && off[5]  >= 5 && off[4] <= 80 && off[6] <= 40 && off[3] <= 800) {
-    #   # print("All conditions for contrains are satisfied.")
-    #   valid <- TRUE
-    #   attempt <- 1
-    # } else {
-    #   valid <- FALSE
-    #   attempt <- attempt + 1
-    #   # print("Not all conditions for contrains are satisfied.")
-    # 
-    # }
-    
+    # you can imagine a scenario when you want that all parameters have a value bigger than 2
+    # you can add as much as constraints you wish to have here 
+    # this probably slow than the evolutionary pipeline from seconds to some minutes due to re sampling process
+    # if (all(off > 2)) {
+
+      # print("All conditions for contrains are satisfied.")
+    #valid <- TRUE
+    # attempt <- 1
+    #} else {
+    #  valid <- FALSE
+    # attempt <- attempt + 1
+      # print("Not all conditions for contrains are satisfied.")
+
+    #}
+
     ################################################################################
 
     
@@ -936,6 +965,9 @@ if(iteration==2){
 }
 evolutionary_log$center = cbind(evolutionary_log$center, colMeans(new_setting[,-1]))
 evolutionary_log$parent_center = cbind(evolutionary_log$parent_center, colMeans(parents_list))
+
+colnames(new_setting) <- c("randomSeed", names)
+
 
 evolutionary_log$sd = cbind(evolutionary_log$sd, sqrt(diag(var( rbind(results_new[,1:nfactors], results_old[,1:nfactors], new_setting[,c(-1)])))))
 
@@ -1014,45 +1046,45 @@ if(binary_parameter){
   for(index in 1:length(avg_approx)){
     avg_approx[index] = approx_f(topbinary_list[[length(topbinary_list)]][index,], range_smooth/2, results_smooth)
   }
-  evolutionary_log$est_approx_max = c(evolutionary_log$est_approx_max, max(avg_approx)) #
-  evolutionary_log$est_approx_sd = c(evolutionary_log$est_approx_sd, sd(avg_approx)) #
-  evolutionary_log$est_approx_avg = c(evolutionary_log$est_approx_avg, mean(avg_approx)) #
+  evolutionary_log$est_approx_max = c(evolutionary_log$est_approx_max, max(avg_approx)) 
+  evolutionary_log$est_approx_sd = c(evolutionary_log$est_approx_sd, sd(avg_approx)) 
+  evolutionary_log$est_approx_avg = c(evolutionary_log$est_approx_avg, mean(avg_approx)) 
 
-  evolutionary_log$est_value = c(evolutionary_log$est_value, eval(rbind(colMeans(topbinary_list[[length(topbinary_list)]])))) # this is possible in practise
+  evolutionary_log$est_value = c(evolutionary_log$est_value, eval(rbind(colMeans(topbinary_list[[length(topbinary_list)]]))))
 
   avg_approx = numeric(nrow(topbinary_list[[length(topbinary_list)]]))
   for(index in 1:length(avg_approx)){
     avg_approx[index] = eval(rbind(topbinary_list[[length(topbinary_list)]][index,]))
   }
 
-  evolutionary_log$est_value_max = c(evolutionary_log$est_value_max, max(avg_approx)) #
-  evolutionary_log$est_value_sd = c(evolutionary_log$est_value_sd, sd(avg_approx)) #
-  evolutionary_log$est_value_avg = c(evolutionary_log$est_value_avg, mean(avg_approx)) #
+  evolutionary_log$est_value_max = c(evolutionary_log$est_value_max, max(avg_approx)) 
+  evolutionary_log$est_value_sd = c(evolutionary_log$est_value_sd, sd(avg_approx)) 
+  evolutionary_log$est_value_avg = c(evolutionary_log$est_value_avg, mean(avg_approx)) 
 
   to_test = new_setting[,-1]
   to_test <- to_test[colSums(t(to_test[,param_cols][,is_binary])==best_binary)==sum(is_binary),]
 }else{
 
   evolutionary_log$est_pos = cbind(evolutionary_log$est_pos, colMeans(top10_list[[length(top10_list)]]))
-  evolutionary_log$est_approx = c(evolutionary_log$est_approx, approx_f(colMeans(top10_list[[length(top10_list)]]), range_smooth, results_smooth)) # this is possible in practise
+  evolutionary_log$est_approx = c(evolutionary_log$est_approx, approx_f(colMeans(top10_list[[length(top10_list)]]), range_smooth, results_smooth)) 
   avg_approx = numeric(nrow(top10_list[[length(top10_list)]]))
   for(index in 1:length(avg_approx)){
     avg_approx[index] = approx_f(top10_list[[length(top10_list)]][index,], range_smooth/2, results_smooth)
   }
-  evolutionary_log$est_approx_max = c(evolutionary_log$est_approx_max, max(avg_approx)) #
-  evolutionary_log$est_approx_sd = c(evolutionary_log$est_approx_sd, sd(avg_approx)) #
-  evolutionary_log$est_approx_avg = c(evolutionary_log$est_approx_avg, mean(avg_approx)) #
+  evolutionary_log$est_approx_max = c(evolutionary_log$est_approx_max, max(avg_approx)) 
+  evolutionary_log$est_approx_sd = c(evolutionary_log$est_approx_sd, sd(avg_approx)) 
+  evolutionary_log$est_approx_avg = c(evolutionary_log$est_approx_avg, mean(avg_approx)) 
 
-  evolutionary_log$est_value = c(evolutionary_log$est_value, eval(rbind(colMeans(top10_list[[length(top10_list)]])))) # this is possible in practise
+  evolutionary_log$est_value = c(evolutionary_log$est_value, eval(rbind(colMeans(top10_list[[length(top10_list)]])))) 
 
   avg_approx = numeric(nrow(top10_list[[length(top10_list)]]))
   for(index in 1:length(avg_approx)){
     avg_approx[index] = eval(rbind(top10_list[[length(top10_list)]][index,]))
   }
 
-  evolutionary_log$est_value_max = c(evolutionary_log$est_value_max, max(avg_approx)) #
-  evolutionary_log$est_value_sd = c(evolutionary_log$est_value_sd, sd(avg_approx)) #
-  evolutionary_log$est_value_avg = c(evolutionary_log$est_value_avg, mean(avg_approx)) #
+  evolutionary_log$est_value_max = c(evolutionary_log$est_value_max, max(avg_approx)) 
+  evolutionary_log$est_value_sd = c(evolutionary_log$est_value_sd, sd(avg_approx)) 
+  evolutionary_log$est_value_avg = c(evolutionary_log$est_value_avg, mean(avg_approx)) 
 }
 
 
@@ -1173,4 +1205,5 @@ evolutionary_log$convergence_target = evo_target
 
 save(file = "EvoStatus/EvoStatus.RData", list = c("evolutionary_log"))
 save(list = c("evolutionary_log"), file = paste0("EvoStatus/EvoStatus", iteration, ".RData"))
+
 
