@@ -1,5 +1,21 @@
 <img src="https://github.com/AHassanpour88/test_for_private/raw/main/images/logo.PNG" align="right" alt="Logo" width="300" height="200">
 
+## Authors
+- Azadeh Hassanpour, azadeh.hassanpour@uni-goettingen.de
+- Johannes Geibel, johannes.geibel@fli.de
+- Torsten Pook, Torsten.pook@wur.nl
+
+## Copyright
+Copyright © 2020 – 2024
+
+## License
+This program falls under a NonCommercial-NoDerivatives-NoDistribution Public License. By using these scripts, I confirm that I represent an academic institute and will use this script only for research purposes. I explicitly acknowledge the terms in the license agreement [here](https://github.com/AHassanpour88/Evolutionary_Snakemake/blob/main/License.md). I understand that any commercial use requires a commercial license from the owner of the script. For more information about a commercial license, please contact Torsten Pook.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+## Manuscript Availability
+A manuscript for the optimization framework is available in [BioarXiv](https://academic.oup.com/g3journal/article/10/6/1915/6026363) / in review. The scripts in this directory are for the example from the toy dairy cattle example and adaptation is needed to use these scripts for other purposes.
+
 # Optimization of breeding program designs through evolutionary algorithm (MoBPSopti Project)
 
 Modern breeding programs have increased significantly in size and complexity, with various highly interdependent parameters and many contrasting breeding goals. As a result, resource allocation in these programs has become more complex, and deriving an optimal breeding strategy has become increasingly challenging. Optimization in breeding programs is crucial, as it helps us make the most efficient use of limited resources such as time, money, and breeding materials, which increases the likelihood of achieving our objectives and ensure adaptability to changing circumstances. The resource allocation problem is a key challenge in optimization theory with various practical uses and many algorithms have been proposed, all sharing a common structure with two parts: simulation and optimization. First, they use simulation to assess performance under different parameter settings. Then, they use optimization to find the best way to allocate these parameters, achieving different objectives while reducing costs or increasing benefits. In this repository, we use an evolutionary optimization framework to optimize resource allocation in a breeding program with the use of stochastic simulation combining with Snakemake workkflow management system, providing you to fine-tune and enhance your breeding program while efficiently allocating your breeding resources to attain various objectives.
@@ -683,38 +699,32 @@ The [visualizeParameters.r](https://github.com/AHassanpour88/Evolutionary_Snakem
 
 **config.yaml**
    
-Start designing and optimizing your new breeding program by utilizing the `config.yaml` file. This crucial file enables you to configure the breeding pipeline according to the specific requirements of your program. Specify the number of parameters, differentiate between class and continuous variables, and provide appropriate variable names to optimize your breeding program effectively. In the optimization process, each parameter is assigned a specific index based on their position in the `name_parameter` variable. Please note that the indexing starts from 1 and continues sequentially. Users must accurately refer to the correct indices.
+Start designing and optimizing your new breeding program by utilizing the `config.yaml` file. This crucial file enables you to configure the breeding pipeline according to the specific requirements of your program. Specify the number of parameters, differentiate between class and continuous variables, and provide appropriate variable names to optimize your breeding program effectively. 
 
-Plugins:
+Plugins for user within config file:
 
 * `@nfactors` Number of parameter that you want to optimize in your simulation process.
-* `@name_parameter` Names of the parameters you want to optimize are listed here. These names should be exactly as the names of the parameter you want to optimize in the simulation process. Each parameter is assigned a specific index based on their position in this variable.
+* `@name_parameter` Names of the parameters you want to optimize are listed here. These names should be exactly as the names of the parameter you want to optimize in the simulation process. Each parameter is assigned a specific index based on their position in this variable. Please note that the indexing starts from 1 and continues sequentially. Users must accurately refer to the correct indices.
 * `@binary_parameter` Existence of class variables by TRUE/FALSE
+* `@number_binary_parameter` Number of class variables
 * `@Sim_init` Number of initial simulations to perform in first iteration to have a good coverage of the search space
-* `@sampleScript` Path to sample scripts for rule 1 used in the optimization process for snakemake
-* `@simuScript` Path to simulation scripts for rule 2 used in the optimization process for snakemake
-* `@evoScript` Path to evolutionary scripts for rule 3 used in the optimization process for snakemake
-* `@visualizeParameters` Path to visualization scripts for rule 4 used in the optimization process for snakemake
-* `@evoParams` Path to iteration.csv file used in the optimization process by evoScript
-* `@simuParams` Path to simuInfo.csv file used in the optimization process by simuScript
 * `@time` Define the time constraint for single simulation
 * `@memory` Define the memory constraint for single simulation
 > To calculate the approximate time and memory for a single simulation, perform only one simulation (with upper bound of the desired parameter settings) and use resource tracking with **sacct** for this step to provide insights into job execution and resource consumption.
 * `@min_range_mu` The mutation operator need a minimum value range for each parameter. This range is essential in cases where the standard deviation of a parameter being mutated is small or when the parameter has a limited set of possible values
 * `@mut_offspring` Mutation probability in recombined offspring.
 * `@mut_parent` Mutation probability in a single parent. 
-* `@linked_parameter` Designed when optimizing closely linked parameters by TRUE/FALSE. When one parameter is linked to other parameters, a mutation in that parameter can affect the others. This option ensures that any mutation in a linked parameter causes changes in all other linked parameters. This approach reduces the number of mutations that occur in highly linked parameters, which can otherwise lead to an unstable or inefficient optimization process. 
+* `@Hybrid_Breeding`or `@Line_Breeding` by TRUE/FALSE 
+* `@linked_parameter` Designed when optimizing closely linked parameters by TRUE/FALSE. When one parameter is linked to other parameters, a mutation in that parameter can affect the others. This option ensures that any mutation in a linked parameter causes changes in all other linked parameters. Our approach is here to reduce the number of mutations that occur in highly linked parameters, which can otherwise lead to an unstable or inefficient optimization process. 
 
-> **NOTE!** `linked_parameter_female` and `linked_parameter_male` are two plugins and a way to organize groups of parameters, where the first value in the list is considered the main parameter. This main parameter is linked with other parameters listed afterward. For instance, if you have `linked_parameter_female: [1,2,3]`, it means that parameters 2 and 3 are linked to parameter 1. So, any changes or adjustments made to parameter 1 will also affect parameters 2 and 3. It's a way of indicating relationships between parameters and understanding that they work together as a group.
+> **NOTE!** `linked_parameter_female` and `linked_parameter_male` are two plugins and a way to organize groups of parameters, where the first value in the list is considered the main parameter. This main parameter is linked with other parameters listed afterward. For instance, if you have `linked_parameter_female: [1,2,3]`, it means that parameters 2 and 3 are linked to parameter 1. So, any changes or adjustments made to parameter 1 will also affect parameters 2 and 3. It's a way of indicating relationships between parameters and understanding that they work together as a group. The same approach is applied in `@Line_Breeding`
 
-> **NOTE!** The linked_parameter option can be challenging to apply universally across different breeding programs, especially if your specific program doesn't have closely interconnected parameters, as demonstrated in the breeding example. In such cases, it's advisable to set linked_parameter_adjustment to TRUE in config file and customize the evolutionary script in `linked_parameter_adjustment` part to align with your program's specific requirements.
+> **NOTE!** The linked_parameter option can be challenging to apply universally across different breeding programs. It's advisable to set `linked_parameter_adjustment` to TRUE in config file and customize the evolutionary script in `linked_parameter_adjustment` part to align with your program's specific requirements.
 
 * `@base_cost_ini` Initial number of each parameter in a base scenario that the cost needs to be calculated for that
 * `@cost_par` Only index of parameters that are included in cost functions
 
 > **NOTE!** Class variables are not directly included in the cost and they usually depend on the existance of the other cohorts 
-
-> **NOTE!** Linked parameters in general are not relevant for cost scaling. But this is very specific to this breeding scheme in that the linked parameters are the ones with no financial impact but that is nothing general and another breeding scenario might have linked parameters that are in the cost (check how to create a cost cost function)
 
 * `@cheapest_unit_female` Identifying the index of cheapest unit in the breeding program on female side
 * `@cheapest_unit_male` Identifying the index of cheapest unit in the breeding program on male side
@@ -730,7 +740,7 @@ The optimization problem's search space varies in size and complexity depending 
 |----------------------|---------------|-------------------|--------------|-------------|----------------------|----------------|--------------|------|
 | 2                    | 3             | 70                | 30           | 0           | 200                  | 0              | 0            | 1    |
 | 4                    | 30            | 30                | 15           | 5           | 170                  | 80             | 0            | 1    |
-| 31                   | 50            | 20                | 7            | 3           | 150                  | 60             | 60           | 2    |
+| 31                   | 50            | 20                | 7            | 3           | 180                  | 90             | 0            | 1    |
 
 These parameter configurations have proven effective in our toy example breeding program.
 * `@iteration_start` What parameter settings in which iteration should be used in the interval between iteration_start and iteration_end
@@ -741,7 +751,7 @@ These parameter configurations have proven effective in our toy example breeding
 * `@n_off_recombination` Number of offspring generated through recombination
 * `@n_off_mutation` Number of offspring produced through mutation
 * `@nrep` Number of replications, which specifies how many times the same simulation should be performed with different random seeds. As the optimization process progresses in later stages, it is advisable to increase the number of replications. This helps to reduce the variance of the stochastic simulation output, providing more reliable and accurate results.
-* `@n_off_random` Number of offspring generated completely from scratch
+* `@n_off_random` Number of offspring generated completely from scratch. 
 
 >  **n_off_random** is associated with the `generate_new` function found in the [function folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/Functions), where the user has the ability to design a new range for decision variables and to dynamically adjust the range of decision variables based on the ongoing analysis of the optimization process. By examining the results obtained in each iteration, the user can fine-tune and redefine the acceptable ranges for the decision variables. This enables the optimization algorithm to explore different regions of the search space and potentially discover more optimal solutions. Due to the unexplored nature of the search space, it is not advisable to activate this functionality in the early stages.
 
@@ -781,9 +791,9 @@ In the context of a breeding program, it's common that not all parameters being 
 The generate_new function is responsible for creating new offspring from scratch and requires user modification. This functionality can be activated in the iterations.csv [file](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/config/iterations.csv) by setting the value of 'n_off_random' to the desired number of offspring. Our algorithm incorporates a random search criterion that can be employed to prioritize exploration rather than solely focusing on exploiting the search space. By reducing the influence of other selection criteria and increasing the weight assigned to random search, the algorithm becomes more adept at thoroughly exploring a vast search space. This becomes particularly crucial in later iterations where the likelihood of becoming trapped in local optima is higher. By activateing this criterion, the algorithm gains the ability to uncover unexpected solutions that may have been overlooked during the initialization phase. To enhance flexibility, users have the option to define new boundaries for decision variables based on previous results or extend the search beyond the initial parameter bounds in [sampleScript](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/scripts/sampleScript.r). This enables a more targeted exploration of the solution space and the discovery of new solutions that might have been disregarded in earlier iterations.
 
 **termination_criteria:**
-to limit computational time before reaching a maximum number of iterations, we defined dual termination criteria based on the average and standard deviation  thresholds for the objective function through a kernel regression applied to the most promising candidate parameters in each iteration. The termination criterion is satisfied when both the mean and standard deviation of the best solutions from the last five iterations are below predefined threshold values. Determining suitable threshold values for these measurements involves considering the problem-specific characteristics, desired optimization precision, and computational resources available for the optimization process. If the the pipeline does not achieve convergence based on these criteria in evolutionary algorithm, the pipeline will stop when the last number of iterations in the table for the last row in the iteration_end is reached. In general, it is recommended that the decision-makers regularly evaluate and track the progress of the algorithm across different iterations based on **EvoStatus.RData** and adjust the termination criteria during the algorithm's development and implementation. If a user determines that the final termination criterion is insufficient and wishes to continue the process, they should consider the following actions:
+to limit computational time before reaching a maximum number of iterations, we defined dual termination criteria based on the average and standard deviation thresholds for the objective function through a kernel regression applied to the most promising candidate parameters in each iteration. The termination criterion is satisfied when both the mean and standard deviation of the best solutions from the last ten iterations are below predefined threshold values. Determining suitable threshold values for these measurements involves considering the problem-specific characteristics, desired optimization precision, and computational resources available for the optimization process. If the the pipeline does not achieve convergence based on these criteria in evolutionary algorithm, the pipeline will stop when the last number of iterations in the table for the last row in the iteration_end is reached. In general, it is recommended that the decision-makers regularly evaluate and track the progress of the algorithm across different iterations based on **EvoStatus.RData** and adjust the termination criteria during the algorithm's development and implementation. If a user determines that the final termination criterion is insufficient and wishes to continue the process, they should consider the following actions:
 
-1- Remove the `rplot.pdf` file from the main folder to avoid any conflicting data.
+1- Remove the final `rplot.pdf` file from the main folder to avoid any conflicting data.
 
 2- Adjust and increase the number of iterations in the [iterations.csv](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/config/iterations.csv).
 
