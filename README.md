@@ -607,7 +607,8 @@ Now that you are familiar how to create special environment, to make our optimiz
 ### Snakemake rules
 
 <img src="https://github.com/AHassanpour88/Evolutionary_Snakemake/blob/main/images/Snakemake.png" align="right" alt="Snakemake" width="300">
-Our Snakemake process is built around four rules, which are translated into four distinct R scripts. For each of these rules, there is a corresponding R script in [scripts folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/scripts). Each rule describes a step in an analysis defining how to obtain output files from input files. Dependencies between rules are determined automatically. Snakemake starts with the first rule and it checks if all the inputs required for that rule are available. If the inputs are ready, it runs the corresponding R script for that rule. After completion, it moves on to the next rule in the sequence. This process repeats until all four rules have been executed. All 4 scripts share a common feature. They uniformly utilize two essential lines of code:
+
+Our Snakemake process is built around four rules, which are translated into four distinct R scripts. For each of these rules, there is a corresponding R script in [script folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/scripts). Each rule describes a step in an analysis defining how to obtain output files from input files. Dependencies between rules are determined automatically. Snakemake starts with the first rule and it checks if all the inputs required for that rule are available. If the inputs are ready, it runs the corresponding R script for that rule. After completion, it moves on to the next rule in the sequence. This process repeats until all four rules have been executed. All 4 scripts share a common feature. They uniformly utilize two essential lines of code:
 
 ```{r}
 args <- commandArgs(TRUE)
