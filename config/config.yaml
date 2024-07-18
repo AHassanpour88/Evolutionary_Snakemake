@@ -1,3 +1,21 @@
+#################################################################################
+################################# Agreement #####################################
+#################################################################################
+# Authors
+# Azadeh Hassanpour, azadeh.hassanpour@uni-goettingen.de
+# Johannes Geibel, johannes.geibel@fli.de
+# Torsten Pook, Torsten.pook@wur.nl
+# Copyright © 2020 – 2024
+# This program falls under a NonCommercial-NoDerivates-NoDistriubtion Public License.
+# With use of these scripts, I confirm that I represent an academic institute and acknowledge that I shall use this script only for research. I explicitly acknowledge the terms in the license agreement https://github.com/AHassanpour88/Evolutionary_Snakemake/blob/main/License.md. I understood that any commercial use needs a commercial license from the owner of the script. For more information about a commercial license please contact Torsten Pook.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+#################################################################################
+#################################################################################
+#################################################################################
+
 # How many parameters we want to optimize?
 nfactors: 4
 
@@ -31,7 +49,7 @@ time: 1*1*60
 # memory in Mb (calculations are evaluated in script)
 memory: 5*1000 
 
-# minimum range of mutation if the variation was low depends on the range of parameter#3 then 2 iter 18
+# minimum range of mutation if the variation was low depends on the range of parameter
 min_range_mut:  [40, 20, 3, 0.01]
 
 # mutation probability of offspring
@@ -44,14 +62,17 @@ mut_parent: 0.3
 # initial cost of the program to be calculated based on each parameter
 # In this toy example as the cost is as constraint does not really matter the value of x1:x4 as long as the x_1(4000 + 1000x_4) + 3000x_2 - 10000000 < 0 is statisfied
 # this is more important in larger breeding program that alternative scenarios compare to the current breeding program and cost is included in objective function
+# Check the cost function in the Functions folder
 base_cost_ini: [2368, 175 ,19 ,0]
 
 # The binary variables and linked parameters are not included in rounding in light of the constraints
 # These parameters will be used so that after sampling and generating offspring from scratch we stay within the budget
 cost_par: [1,2]
 
-# If you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters
-# Find the linked_parameter if statement in the evoScript and adapt the number of parameters linked 
+# If you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters, if there is additional adjustment to the is needed
+# As an example you want to optimze the number of new parents for the next cycle and you have specific criteria from which cohorts parents should be selected and 
+# if the number of those cohorts suppose to be optimized as well, you need to create a criteria that the number of units you are selecting from those cohorts are match the number of new parents!
+# Find the linked_parameter if statement in the evoScript and adapt the number of parameters linked to your specific problem
 linked_parameter: TRUE
 linked_parameter_adjustment: FALSE 
 
