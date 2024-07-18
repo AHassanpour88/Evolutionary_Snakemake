@@ -600,13 +600,13 @@ conda activate mobpsopti
 ```
 **3. mobpsopti environment for optimization**
 
-Now that you are familiar how to create special environment, to make our optimization work easier for you, we've created a bash script that helps you install `Miniconda` and a special environment called `mobpsopti`. You can find all necessary file for this part in [environment folder](https://github.com/AHassanpour88/BASF_Hybrid_Wheat/tree/main/environment). This `mobpsopti` environment is like a toolbox with different tools we need for optimization. It includes things like Python, Pandas, and Snakemake for managing tasks, as well as R and some R packages for data analysis. All of these tools are important for our optimization work and help us get things done more efficiently. Before you start your optimization please make sure that you installed everything correctly. Further, if you plan to distribute the snakemake jobs across a larger [cluster](https://snakemake.readthedocs.io/en/stable/executing/cluster.html), you need to setup a profile for your specific cluster scheduler (e.g. slurm). You can find some default profiles in this [project](https://github.com/snakemake-profiles/doc). 
+Now that you are familiar how to create special environment, to make our optimization work easier for you, we've created a bash script that helps you install `Miniconda` and a special environment called `mobpsopti`. You can find all necessary file for this part in [environment folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/environment). This `mobpsopti` environment is like a toolbox with different tools we need for optimization. It includes things like Python, Pandas, and Snakemake for managing tasks, as well as R and some R packages for data analysis. All of these tools are important for our optimization work and help us get things done more efficiently. Before you start your optimization please make sure that you installed everything correctly. Further, if you plan to distribute the snakemake jobs across a larger [cluster](https://snakemake.readthedocs.io/en/stable/executing/cluster.html), you need to setup a profile for your specific cluster scheduler (e.g. slurm). You can find some default profiles in this [project](https://github.com/snakemake-profiles/doc). 
 
 </details>
 
 ### Snakemake rules
-<img src="https://github.com/AHassanpour88/test_for_private/raw/main/images/Snakemake.png" align="right" alt="Snakemake" width="300">
 
+<img src="https://github.com/AHassanpour88/Evolutionary_Snakemake/blob/main/images/Snakemake.png" align="right" alt="Snakemake" width="300">
 Our Snakemake process is built around four rules, which are translated into four distinct R scripts. For each of these rules, there is a corresponding R script in [scripts folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/scripts). Each rule describes a step in an analysis defining how to obtain output files from input files. Dependencies between rules are determined automatically. Snakemake starts with the first rule and it checks if all the inputs required for that rule are available. If the inputs are ready, it runs the corresponding R script for that rule. After completion, it moves on to the next rule in the sequence. This process repeats until all four rules have been executed. All 4 scripts share a common feature. They uniformly utilize two essential lines of code:
 
 ```{r}
@@ -755,7 +755,7 @@ These parameter configurations have proven effective in our toy example breeding
 
 >  **n_off_random** is associated with the `generate_new` function found in the [function folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/edit/main/Functions), where the user has the ability to design a new range for decision variables and to dynamically adjust the range of decision variables based on the ongoing analysis of the optimization process. By examining the results obtained in each iteration, the user can fine-tune and redefine the acceptable ranges for the decision variables. This enables the optimization algorithm to explore different regions of the search space and potentially discover more optimal solutions. Due to the unexplored nature of the search space, it is not advisable to activate this functionality in the early stages.
 
-**Function [folder](https://github.com/AHassanpour88/BASF_Hybrid_Wheat/tree/main/functions)**
+**Function [folder](https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/Functions)**
 
 **cost_function**
 
