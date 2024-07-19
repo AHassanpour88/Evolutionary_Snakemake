@@ -1,5 +1,4 @@
-<img src="https://github.com/AHassanpour88/Evolutionary_Snakemake/tree/main/images/logo.PNG" align="right" alt="Logo" width="300" height="200">
-
+<img src="https://github.com/AHassanpour88/Evolutionary_Snakemake/blob/main/images/logo.PNG" align="right" alt="Logo" width="300" height="200">
 
 ## Authors
 - Azadeh Hassanpour, azadeh.hassanpour@uni-goettingen.de
