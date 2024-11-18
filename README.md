@@ -14,7 +14,7 @@ This program falls under a NonCommercial-NoDerivatives-NoDistribution Public Lic
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Manuscript Availability
-A manuscript for the optimization framework is available in [G3 Genes|Genomes|Genetics]([https://arxiv.org/abs/2407.17286](https://doi.org/10.1093/g3journal/jkae248)). The scripts in this directory are for the example from the toy dairy cattle example and adaptation is needed to use these scripts for other purposes.
+A manuscript for the optimization framework is available in [G3 Genes|Genomes|Genetics](https://doi.org/10.1093/g3journal/jkae248). The scripts in this directory are for the example from the toy dairy cattle example and adaptation is needed to use these scripts for other purposes.
 
 # Optimization of breeding program designs through an evolutionary algorithm (MoBPSopti Project)
 
