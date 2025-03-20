@@ -1,0 +1,90 @@
+# How many parameters we want to optimize?
+nfactors: 17
+
+# Do we have binary/class variables?
+binary_parameter: TRUE
+number_binary_parameter: 1
+binary: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+# Which parameters should be integer??
+integer: [TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE]
+
+# Name of parameters we want to optimize?
+name_parameter:
+  - "TC2.2_YT"
+  - "ncross_female"
+  - "ncross_male" 
+  - "DH0_capacity_female"
+  - "DH0_capacity_male" 
+  - "OBS1_female"
+  - "OBS1_male" 
+  - "OBS2_female"
+  - "OBS2_male" 
+  - "OBS3_female"
+  - "OBS3_male" 
+  - "female_rec_OBS3"
+  - "female_rec_OBS2" 
+  - "female_rec_OBS1"
+  - "male_rec_OBS3"
+  - "male_rec_OBS2" 
+  - "male_rec_OBS1"
+
+# number of initial simulation that we need to sample from can be specified within the sampleScript 
+sim_init: 2000 #big enough that we have a good coverage on search space!
+sampleScript: "scripts/sampleScript.r"
+# adapt your silumation script in simuScript
+simuScript: "scripts/simuScript.r"
+# Evolutionary algorithm 
+evoScript: "scripts/evoScript.r"
+evoParams: "config/iterations.csv"
+# plotting a new points
+visualizeParameters: "scripts/visualizeParameters.r"
+# time in minuites (calculations are evaluated in script)
+time: 1*1*99
+# memory in Mb (calculations are evaluated in script)
+memory: 12*1000 
+
+# minimum range of mutation if the variation was low depends on the range of parameter
+min_range_mut: [0.1, 30, 30, 500, 500, 50, 50, 5, 5, 2, 2, 3, 3, 3, 3, 3, 3]
+
+# mutation probability of offspring
+mut_offspring: 0.1
+#mutation probability of parents
+mut_parent: 0.2
+
+# initial cost of the program to be calculated based on each parameter
+# Only parameters that are included in cost functions will be used and then
+# initial cost of the program to be calculated based on each parameter
+base_cost_ini:  [1, 100, 100, 10000, 10000, 500, 500, 300, 300, 30, 30]
+
+# The binary variables and linked parameters are not included in rounding in light of the constraints
+# These parameters will be used so that after sampling and generating offspring from scratch we stay within the budget
+cost_par: [2,3,4,5,6,7,8,9,10,11]
+
+# If you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters
+# Find the linked_parameter if statement in the evoScript and adapt the number of parameters linked 
+linked_parameter: TRUE
+linked_parameter_adjustment: TRUE 
+
+################# Hybrid ##########################
+Hybrid_Breeding: TRUE
+linked_parameter_male:  [3, 15,16,17] # The first parameter is the one that other parameters are after that linked to
+linked_parameter_female: [2, 12,13,14] 
+num_linked_parameter_male: 3
+num_linked_parameter_female: 3
+cheapest_unit_female: [4] # crosses are cheapest but as they are linked to 3 parameters DH is considered due to the big size
+cheapest_unit_male: [5] # 
+# Cheapest cost of a parameter using the cost function in the Function folder
+cost_cheapest_male: 80
+cost_cheapest_female: 80
+
+#################### Line ##########################
+Line_Breeding: FALSE
+num_linked_parameter: 1
+which_linked_parameter:  [1, 2]
+cheapest_unit: [3]
+cost_cheapest: 100
+
+# For visualization, if you already know what is your target is
+my_target: TRUE
+target: [1, 100, 100, 10000, 10000, 500, 500, 300, 300, 30, 30]
