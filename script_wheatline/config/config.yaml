@@ -1,0 +1,82 @@
+# How many parameters we want to optimize?
+nfactors: 6
+
+# Do we have binary/class variables?
+binary_parameter: FALSE
+number_binary_parameter: 0
+binary: [FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+# Which parameters should be integer??
+integer: [TRUE, TRUE, TRUE, TRUE, TRUE, TRUE]
+
+# Name of parameters we want to optimize?
+name_parameter:
+  - "nCrosses " 
+  - "nDH"
+  - "nPYT"
+  - "nAYT" 
+  - "nEYT"
+  - "newParents_replace"
+
+# number of initial simulation that we need to sample from can be specified within the sampleScript 
+sim_init: 1000 #big enough that we have a good coverage on search space!
+sampleScript: "scripts/sampleScript.r"
+# adapt your silumation script in simuScript
+simuScript: "scripts/simuScript.r"
+# Evolutionary algorithm 
+evoScript: "scripts/evoScript.r"
+evoParams: "config/iterations.csv"
+# plotting a new points
+visualizeParameters: "scripts/visualizeParameters.r"
+# time in minuites (calculations are evaluated in script)
+time: 1*1*60
+# memory in Mb (calculations are evaluated in script)
+memory: 1*1500 
+
+# minimum range of mutation if the variation was low depends on the range of parameter#3 then 2 iter 18
+min_range_mut:  [50, 30, 50, 5, 5, 5]
+
+# mutation probability of offspring
+mut_offspring: 0.2
+#mutation probability of parents
+mut_parent: 0.3
+
+# initial cost of the program to be calculated based on each parameter
+# Only parameters that are included in cost functions will be used and then
+# initial cost of the program to be calculated based on each parameter
+# In this toy example as the cost is as constraint does not really matter the value of x1:x4 as long as the x_1(4000 + 1000x_4) + 3000x_2 - 10000000 < 0 is statisfied
+# this is more important in larger breeding program that alternative scenarios compare to the current breeding program and cost is included in objective function
+base_cost_ini:  [100, 89 ,500, 50 ,10]
+
+# The binary variables and linked parameters are not included in rounding in light of the constraints
+# These parameters will be used so that after sampling and generating offspring from scratch we stay within the budget
+cost_par: [1,2,3,4,5]
+
+# If you have linked parameters the evolutionary algorithm needs to be adapted based on the number of parameters
+# Find the linked_parameter if statement in the evoScript and adapt the number of parameters linked 
+linked_parameter: TRUE 
+linked_parameter_adjustment: FALSE 
+
+################# Hybrid ##########################
+Hybrid_Breeding: FALSE
+linked_parameter_male:  [0, 0] # the fisrt parameter is the one that other parameters are after that linked to
+linked_parameter_female: [0, 0] 
+num_linked_parameter_male: 0
+num_linked_parameter_female: 0
+cheapest_unit_female: [0]
+cheapest_unit_male: [0]
+
+# Cheapest cost of a parameter using the cost function in Function folder
+cost_cheapest_male: 0
+cost_cheapest_female: 0
+
+#################### Line ##########################
+Line_Breeding: TRUE
+num_linked_parameter: 1
+which_linked_parameter:  [1, 2]
+cheapest_unit: [3]
+cost_cheapest: 100
+
+# For visualization, if you already know what is your target is
+my_target: TRUE
+target: [100, 89 ,500, 50 ,10, 10]
