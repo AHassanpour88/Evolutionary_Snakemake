@@ -1,0 +1,4 @@
+iteration_start,iteration_end,n_sel_high_target,n_sel_kernel,n_sel_last2,n_off_recombination,n_off_mutation,n_off_random,nrep
+2,3,70,30,0,200,0,0,1
+4,10,30,15,5,180,70,0,1
+11,151,20,7,3,180,90,0,1
