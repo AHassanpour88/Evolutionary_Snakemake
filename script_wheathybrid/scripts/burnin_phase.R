@@ -1,7 +1,7 @@
 #updated version with modification on parameter settings read from config file
 #the base scenario was performed based on this number
-# for NUM in {1..20}; do
-# sbatch -p medium -t 5:0:0 -n 4 -o logfile_${NUM}.log -N 1 --mem=50G --wrap="source ~/.bashrc; conda activate mobpsopti;  Rscript --vanilla BASF_burnin_phase.R ${NUM} FALSE FALSE 100 100 10000 10000 500, 500 300 300 30 30 60 10 10 60 10 10 50 66";
+# for NUM in {1..1}; do
+# sbatch -p medium -t 5:0:0 -n 4 -o logfile_${NUM}.log -N 1 --mem=50G --wrap="source ~/.bashrc; conda activate mobpsopti;  Rscript --vanilla burnin_phase.R ${NUM} FALSE FALSE 100 100 10000 10000 500, 500 300 300 30 30 60 10 10 60 10 10 50 66";
 # done
 
 #install.packages("MoBPS_1.11.64.tar.gz", repos = NULL, type = "source") 
